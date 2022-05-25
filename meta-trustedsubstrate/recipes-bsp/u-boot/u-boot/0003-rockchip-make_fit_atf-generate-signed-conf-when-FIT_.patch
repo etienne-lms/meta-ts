@@ -1,0 +1,130 @@
+From af378c0fdfe5dcdae47295aa150579332b127dd2 Mon Sep 17 00:00:00 2001
+From: Jerome Forissier <jerome.forissier@linaro.org>
+Date: Fri, 20 May 2022 16:50:23 +0200
+Subject: [PATCH] rockchip: make_fit_atf: generate signed conf when
+ FIT_SIGN_KEY is set
+
+Introduce the environment variable FIT_SIGN_KEY which when set is the name
+of the key that should be used to sign the binaries and configuration in
+the FIT image. Usage example (tested on RockPi4B):
+
+ mkdir keys
+ openssl genpkey -algorithm RSA -out keys/dev.key \
+        -pkeyopt rsa_keygen_bits:2048 -pkeyopt rsa_keygen_pubexp:65537
+ openssl req -batch -new -x509 -key keys/dev.key -out keys/dev.crt
+ FIT_SIGN_KEY=dev TEE=.../tee.bin BL31=.../bl31.elf \
+        ../../git/arch/arm/mach-rockchip/make_fit_atf.py \
+        arch/arm/dts/rk3399-rock-pi-4b.dtb > u-boot.its
+ cp spl/dts/dt-spl.dtb spl/u-boot-spl.dtb
+ ./tools/mkimage -E -B 0x8 -p 0x0 -f u-boot.its -k keys \
+        -r -K spl/u-boot-spl.dtb u-boot.itb
+ cat tpl/u-boot-tpl-rockchip.bin spl/u-boot-spl-nodtb.bin \
+        spl/u-boot-spl.dtb > idbloader.img
+
+Signed-off-by: Jerome Forissier <jerome.forissier@linaro.org>
+---
+ arch/arm/mach-rockchip/make_fit_atf.py | 49 ++++++++++++++++++--------
+ 1 file changed, 34 insertions(+), 15 deletions(-)
+
+diff --git a/arch/arm/mach-rockchip/make_fit_atf.py b/arch/arm/mach-rockchip/make_fit_atf.py
+index f3224d2555..e587760ccf 100755
+--- a/arch/arm/mach-rockchip/make_fit_atf.py
++++ b/arch/arm/mach-rockchip/make_fit_atf.py
+@@ -28,19 +28,6 @@ DT_HEADER = """
+ 	images {
+ """
+ 
+-DT_UBOOT = """
+-		uboot {
+-			description = "U-Boot (64-bit)";
+-			data = /incbin/("u-boot-nodtb.bin");
+-			type = "standalone";
+-			os = "U-Boot";
+-			arch = "arm64";
+-			compression = "none";
+-			load = <0x%08x>;
+-		};
+-
+-"""
+-
+ DT_IMAGES_NODE_END = """	};
+ 
+ """
+@@ -60,6 +47,7 @@ def append_bl31_node(file, atf_index, phy_addr, elf_entry):
+     file.write('\t\t\tload = <0x%08x>;\n' % phy_addr)
+     if atf_index == 1:
+         file.write('\t\t\tentry = <0x%08x>;\n' % elf_entry)
++    append_hash_sig_nodes(file)
+     file.write('\t\t};\n')
+     file.write('\n')
+ 
+@@ -75,6 +63,7 @@ def append_tee_node(file, atf_index, phy_addr, elf_entry):
+     file.write('\t\t\tcompression = "none";\n')
+     file.write('\t\t\tload = <0x%08x>;\n' % phy_addr)
+     file.write('\t\t\tentry = <0x%08x>;\n' % elf_entry)
++    append_hash_sig_nodes(file)
+     file.write('\t\t};\n')
+     file.write('\n')
+ 
+@@ -88,6 +77,7 @@ def append_fdt_node(file, dtbs):
+         file.write('\t\t\tdata = /incbin/("%s");\n' % dtb)
+         file.write('\t\t\ttype = "flat_dt";\n')
+         file.write('\t\t\tcompression = "none";\n')
++        append_hash_sig_nodes(file)
+         file.write('\t\t};\n')
+         file.write('\n')
+         cnt = cnt + 1
+@@ -108,6 +98,13 @@ def append_conf_section(file, cnt, dtname, segments):
+     if segments <= 1:
+         file.write(';\n')
+     file.write('\t\t\tfdt = "fdt_%d";\n' % cnt)
++    key_name = os.getenv('FIT_SIGN_KEY')
++    if key_name:
++        file.write('\t\t\tsignature {\n')
++        file.write('\t\t\t\tsign-images = "firmware","loadables","fdt";\n')
++        file.write('\t\t\t\talgo = "sha1,rsa2048";\n')
++        file.write('\t\t\t\tkey-name-hint = "dev";\n')
++        file.write('\t\t\t};\n')
+     file.write('\t\t};\n')
+     file.write('\n')
+ 
+@@ -123,12 +120,34 @@ def append_conf_node(file, dtbs, segments):
+     file.write('\t};\n')
+     file.write('\n')
+ 
+-def generate_atf_fit_dts_uboot(fit_file, uboot_file_name):
++def generate_atf_fit_dts_uboot(file, uboot_file_name):
+     segments = unpack_elf(uboot_file_name)
+     if len(segments) != 1:
+         raise ValueError("Invalid u-boot ELF image '%s'" % uboot_file_name)
+     index, entry, p_paddr, data = segments[0]
+-    fit_file.write(DT_UBOOT % p_paddr)
++    file.write('\n')
++    file.write('\t\tuboot {\n')
++    file.write('\t\t\tdescription = "U-Boot (64-bit)";\n')
++    file.write('\t\t\tdata = /incbin/("u-boot-nodtb.bin");\n')
++    file.write('\t\t\ttype = "standalone";\n')
++    file.write('\t\t\tos = "U-Boot";\n')
++    file.write('\t\t\tarch = "arm64";\n')
++    file.write('\t\t\tcompression = "none";\n')
++    file.write('\t\t\tload = <0x%08x>;\n' % p_paddr)
++    append_hash_sig_nodes(file)
++    file.write('\t\t};\n')
++    file.write('\n')
++
++def append_hash_sig_nodes(file):
++    key_name = os.getenv("FIT_SIGN_KEY")
++    if key_name:
++        file.write('\t\t\thash-1 {\n')
++        file.write('\t\t\t\talgo = "sha1";\n')
++        file.write('\t\t\t};\n')
++        file.write('\t\t\tsignature-1 {\n')
++        file.write('\t\t\t\talgo = "sha1,rsa2048";\n')
++        file.write('\t\t\t\tkey-name-hint = "%s";\n' % key_name)
++        file.write('\t\t\t};\n')
+ 
+ def generate_atf_fit_dts_bl31(fit_file, bl31_file_name, tee_file_name, dtbs_file_name):
+     segments = unpack_elf(bl31_file_name)
+-- 
+2.34.1
+
