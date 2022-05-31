@@ -1,0 +1,204 @@
+From 2f24730f2ca99f30237b36f2b491fbb05cdfbb1b Mon Sep 17 00:00:00 2001
+From: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Date: Mon, 30 May 2022 17:21:26 +0300
+Subject: [PATCH] Subject: [PATCH] som: Kria specific setting configurations
+
+Add specific kria configs
+
+Signed-off-by: Michal Simek <michal.simek@xilinx.com>
+---
+ som.its | 182 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 182 insertions(+)
+ create mode 100644 som.its
+
+diff --git a/som.its b/som.its
+new file mode 100644
+index 000000000000..7e7372bbb0d5
+--- /dev/null
++++ b/som.its
+@@ -0,0 +1,182 @@
++/dts-v1/;
++
++/ {
++	description = "DT Blob Creation";
++
++	images {
++		fdt-system-top {
++			description = "SMK";
++			data = /incbin/("arch/arm/dts/zynqmp-smk-k26-revA.dtb");
++			type = "flat_dt";
++			arch = "arm64";
++			compression = "none";
++			hash-1 {
++				algo = "md5";
++			};
++		};
++		fdt-zynqmp-smk-k26-revA-sck-kv-g-revA {
++			description = "zynqmp-smk-k26-revA-sck-kv-g-revA";
++			data = /incbin/("zynqmp-smk-k26-revA-sck-kv-g-revA.dtb");
++			type = "flat_dt";
++			arch = "arm64";
++			compression = "none";
++			hash-1 {
++				algo = "md5";
++			};
++		};
++		fdt-zynqmp-sm-k26-revA-sck-kv-g-revA {
++			description = "zynqmp-sm-k26-revA-sck-kv-g-revA";
++			data = /incbin/("zynqmp-sm-k26-revA-sck-kv-g-revA.dtb");
++			type = "flat_dt";
++			arch = "arm64";
++			compression = "none";
++			hash-1 {
++				algo = "md5";
++			};
++		};
++		fdt-zynqmp-smk-k26-revA-sck-kv-g-revB {
++			description = "zynqmp-smk-k26-revA-sck-kv-g-revB";
++			data = /incbin/("zynqmp-smk-k26-revA-sck-kv-g-revB.dtb");
++			type = "flat_dt";
++			arch = "arm64";
++			compression = "none";
++			hash-1 {
++				algo = "md5";
++			};
++		};
++		fdt-zynqmp-sm-k26-revA-sck-kv-g-revB {
++			description = "zynqmp-sm-k26-revA-sck-kv-g-revB";
++			data = /incbin/("zynqmp-sm-k26-revA-sck-kv-g-revB.dtb");
++			type = "flat_dt";
++			arch = "arm64";
++			compression = "none";
++			hash-1 {
++				algo = "md5";
++			};
++		};
++	};
++
++	configurations {
++		default = "config_1";
++		config_1 {
++			description = "system-top";
++			fdt = "fdt-system-top";
++		};
++		config_4 {
++			description = "zynqmp-smk-k26-xcl2g-revA-sck-kv-g-revA";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revA";
++		};
++		config_5 {
++			description = "zynqmp-smk-k26-xcl2g-revA-sck-kv-g-revB";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revB";
++		};
++		config_6 {
++			description = "zynqmp-smk-k26-xcl2g-revA-sck-kv-g-revZ";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revA";
++		};
++		config_7 {
++			description = "zynqmp-smk-k26-xcl2g-revA-sck-kv-g-rev1";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revB";
++		};
++		config_8 {
++			description = "zynqmp-smk-k26-xcl2g-revB-sck-kv-g-revA";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revA";
++		};
++		config_9 {
++			description = "zynqmp-smk-k26-xcl2g-revB-sck-kv-g-revZ";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revA";
++		};
++		config_10 {
++			description = "zynqmp-smk-k26-xcl2g-revB-sck-kv-g-revB";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revB";
++		};
++		config_11 {
++			description = "zynqmp-smk-k26-xcl2g-revB-sck-kv-g-rev1";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revB";
++		};
++		config_12 {
++			description = "zynqmp-smk-k26-xcl2g-rev1-sck-kv-g-revA";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revA";
++		};
++		config_13 {
++			description = "zynqmp-smk-k26-xcl2g-rev1-sck-kv-g-revZ";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revA";
++		};
++		config_14 {
++			description = "zynqmp-smk-k26-xcl2g-rev1-sck-kv-g-revB";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revB";
++		};
++		config_15 {
++			description = "zynqmp-smk-k26-xcl2g-rev1-sck-kv-g-rev1";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revB";
++		};
++		config_23 {
++			description = "zynqmp-smk-k26-xcl2g-ed-revA-sck-kv-g-revA";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revA";
++		};
++		config_24 {
++			description = "zynqmp-smk-k26-xcl2g-ed-revA-sck-kv-g-revB";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revB";
++		};
++		config_27 {
++			description = "zynqmp-smk-k26-xcl2g-ed-revA-sck-kv-g-revZ";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revA";
++		};
++		config_28 {
++			description = "zynqmp-smk-k26-xcl2g-ed-revA-sck-kv-g-rev1";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revB";
++		};
++		config_29 {
++			description = "zynqmp-smk-k26-xcl2g-ed-revB-sck-kv-g-revA";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revA";
++		};
++		config_30 {
++			description = "zynqmp-smk-k26-xcl2g-ed-revB-sck-kv-g-revZ";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revA";
++		};
++		config_31 {
++			description = "zynqmp-smk-k26-xcl2g-ed-revB-sck-kv-g-revB";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revB";
++		};
++		config_32 {
++			description = "zynqmp-smk-k26-xcl2g-ed-revB-sck-kv-g-rev1";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revB";
++		};
++		config_33 {
++			description = "zynqmp-smk-k26-xcl2g-ed-rev1-sck-kv-g-revA";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revA";
++		};
++		config_34 {
++			description = "zynqmp-smk-k26-xcl2g-ed-rev1-sck-kv-g-revZ";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revA";
++		};
++		config_35 {
++			description = "zynqmp-smk-k26-xcl2g-ed-rev1-sck-kv-g-revB";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revB";
++		};
++		config_36 {
++			description = "zynqmp-smk-k26-xcl2g-ed-rev1-sck-kv-g-rev1";
++			fdt = "fdt-zynqmp-smk-k26-revA-sck-kv-g-revB";
++		};
++		config_44 {
++			description = "zynqmp-sm-k26-xcl2g-revA-sck-kv-g-revA";
++			fdt = "fdt-zynqmp-sm-k26-revA-sck-kv-g-revA";
++		};
++		config_45 {
++			description = "zynqmp-sm-k26-xcl2gc-ed-revA-sck-kv-g-revA";
++			fdt = "fdt-zynqmp-sm-k26-revA-sck-kv-g-revA";
++		};
++		config_46 {
++			description = "zynqmp-sm-k26-xcl2gc-ed-revB-sck-kv-g-revB";
++			fdt = "fdt-zynqmp-sm-k26-revA-sck-kv-g-revB";
++		};
++		config_48 {
++			description = "zynqmp-sm-k26-xcl2gc-rev1-sck-kv-g-rev1";
++			fdt = "fdt-zynqmp-sm-k26-revA-sck-kv-g-revB";
++		};
++		config_49 {
++			description = "zynqmp-sm-k26-xcl2gc-rev1 -sck-kv-g-rev1";
++			fdt = "fdt-zynqmp-sm-k26-revA-sck-kv-g-revB";
++		};
++	};
++};
+-- 
+2.36.1
+

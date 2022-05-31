@@ -11,6 +11,7 @@ MACHINE_OPTEE_OS_REQUIRE:synquacer = "optee-os_synquacer.inc"
 MACHINE_OPTEE_OS_REQUIRE:stm32mp157c-dk2 = "optee-os-stm32mp157c-dk2.inc"
 MACHINE_OPTEE_OS_REQUIRE:stm32mp157c-ev1 = "optee-os-stm32mp157c-ev1.inc"
 MACHINE_OPTEE_OS_REQUIRE:rockpi4b = "optee-os-rockpi4b.inc"
+MACHINE_OPTEE_OS_REQUIRE:zynqmp-production = "optee-os-zynmp.inc"
 
 require ${MACHINE_OPTEE_OS_REQUIRE}
 
