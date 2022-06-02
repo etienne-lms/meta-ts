@@ -1,4 +1,9 @@
 # Machine specific TFAs
+#
+
+SRC_URI = "git://git.trustedfirmware.org/TF-A/trusted-firmware-a.git;protocol=https;name=tfa;branch=master"
+SRCREV_tfa = "c3bdd3d3cf0f9cdf3be117e39386492e645a1bb5"
+LIC_FILES_CHKSUM="file://docs/license.rst;md5=b2c740efedc159745b9b31f88ff03dde"
 
 MACHINE_TFA_REQUIRE ?= ""
 

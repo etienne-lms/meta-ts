@@ -1,13 +1,9 @@
 # Socionext Synquacer 64-bit machines specific TFA support
 
 COMPATIBLE_MACHINE = "synquacer"
-
 SRC_URI = "git://git.trustedfirmware.org/TF-A/trusted-firmware-a.git;protocol=https;name=tfa;branch=master"
-
-# TF-A master branch with all Corstone1000 patches merged
 SRCREV_tfa = "c158878249f1bd930906ebd744b90d3f2a8265f1"
 PV .= "+git${SRCREV_tfa}"
-
 LIC_FILES_CHKSUM="file://docs/license.rst;md5=713afe122abbe07f067f939ca3c480c5 file://mbedtls/LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files/synquacer:"

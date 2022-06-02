@@ -2,17 +2,9 @@
 
 COMPATIBLE_MACHINE = "stm32mp157c-dk2"
 
-SRC_URI = "git://git.trustedfirmware.org/TF-A/trusted-firmware-a.git;protocol=https;name=tfa;branch=master"
-
-# TF-A master branch with all Corstone1000 patches merged
-SRCREV_tfa = "e537bcdedb16907ecab911e851c1dc4f35411b49"
 PV .= "+git${SRCREV_tfa}"
 
-LIC_FILES_CHKSUM="file://docs/license.rst;md5=b2c740efedc159745b9b31f88ff03dde"
-
 FILESEXTRAPATHS:prepend := "${THISDIR}/files/stm32mp1:"
-
-SRC_URI:append = " file://0001-fix-stm32mp1-fix-dtc-version-check.patch"
 
 TFA_DEBUG = "0"
 TFA_UBOOT = "0"
