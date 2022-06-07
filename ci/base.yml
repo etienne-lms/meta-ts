@@ -9,7 +9,8 @@ defaults:
 
 repos:
   meta-trustedsubstrate:
-    path: meta-trustedsubstrate
+    layers:
+        meta-trustedsubstrate:
   poky:
     url: https://git.yoctoproject.org/git/poky
     refspec: 0539b563c6f41fef383429a13c28bf918231d404

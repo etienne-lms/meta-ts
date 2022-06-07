@@ -4,7 +4,7 @@ header:
     - base.yml
     - meta-openembedded.yml
 
-machine: qemuarm64-secureboot
+machine: tsqemuarm64-secureboot
 
 local_conf_header:
   bugs: |
