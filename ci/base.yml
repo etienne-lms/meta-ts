@@ -12,6 +12,7 @@ repos:
     layers:
         meta-trustedsubstrate:
   poky:
+    path: layers/poky
     url: https://git.yoctoproject.org/git/poky
     refspec: 0539b563c6f41fef383429a13c28bf918231d404
     layers:
@@ -20,11 +21,12 @@ repos:
     patches:
       p1:
         repo : poky
-        path : ../patches/0001-wic-add-UEFI-kernel-as-UEFI-stub.patch
+        path : ../../patches/0001-wic-add-UEFI-kernel-as-UEFI-stub.patch
       p2:
         repo : poky
-        path : ../patches/0002-wic-bootimg-efi-implement-include-path.patch
+        path : ../../patches/0002-wic-bootimg-efi-implement-include-path.patch
   meta-arm:
+    path: layers/meta-arm
     url: git://git.yoctoproject.org/meta-arm
     refspec: 3ee7d019898854f776f95ed31f4b7ea8c8a73dfe
     layers:
