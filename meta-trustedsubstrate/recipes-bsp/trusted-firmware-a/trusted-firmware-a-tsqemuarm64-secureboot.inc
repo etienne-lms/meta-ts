@@ -5,7 +5,7 @@ COMPATIBLE_MACHINE = "tsqemuarm64-secureboot"
 TFA_PLATFORM = "qemu"
 TFA_SPD = "opteed"
 TFA_UBOOT = "1"
-TFA_BUILD_TARGET:aarch64:qemuall = "all fip"
+TFA_BUILD_TARGET:aarch64:qemuall = "clean all fip"
 TFA_INSTALL_TARGET = "flash.bin"
 
 DEPENDS:append:aarch64:qemuall = " optee-os u-boot"
