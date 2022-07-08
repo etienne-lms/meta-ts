@@ -53,10 +53,6 @@ local_conf_header:
     UEFI_CERT_FILE = "${TOPDIR}/../meta-trustedsubstrate/uefi-certificates/uefi_certs.tgz"
   noptest: |
     DISTRO_FEATURES:remove = "ptest"
-  sstate_mirror: |
-    BB_HASHSERVE_UPSTREAM = "typhoon.yocto.io:8687"
-    BB_HASHSERVE = "auto"
-    BB_SIGNATURE_HANDLER = "OEEquivHash"
 
 machine: unset
 
