@@ -18,7 +18,7 @@ Compiling for different boards is straightforward.
 
    Since UEFI secure boot is enabled by default, boards that embed the UEFI keys
    in the firmware binary will use the predefined Linaro `certificates
-   <https://git.codelinaro.org/linaro/dependable-boot/meta-ts/-/tree/master/meta-trustedsubstrate/uefi-certificates>`_.
+   <https://gitlab.com/linaro/trustedsubstrate/meta-ts/-/tree/master/meta-trustedsubstrate/uefi-certificates>`_.
    Those boards will only be allowed to boot images signed by the 
    afforementioned Linaro certificates.
    
@@ -28,7 +28,7 @@ Compiling for different boards is straightforward.
 
 .. code-block:: bash
 
-    git clone https://git.codelinaro.org/linaro/dependable-boot/meta-ts.git
+    git clone https://gitlab.com/linaro/trustedsubstrate/meta-ts.git
     cd meta-ts
     kas build ci/<board>.yml
 
