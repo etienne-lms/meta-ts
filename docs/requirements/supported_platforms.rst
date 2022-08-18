@@ -46,6 +46,8 @@ Raspberry Pi4            Proprietary   Yes (Built-in vars) Yes (needs SPI TPM)  
 Xilinx kv260 starter kit U-Boot SPL    Yes (Built-in vars) Yes                      WIP
 ======================== ============  =================== ======================== ===========
 
+A high level overview of the boot chain looks will look like this
+
 .. uml::
 
     object BL2 {
@@ -71,4 +73,4 @@ Xilinx kv260 starter kit U-Boot SPL    Yes (Built-in vars) Yes                  
     BL2 --> BL31
     BL2 --> BL32
     BL2 --> BL33
-    BL33--> OS
+    BL33--> OS : Label UEFI Secure and Measured Boot
