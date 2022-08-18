@@ -12,12 +12,12 @@ Software Components
 Generally the following software components are used to boot up the boards
 and setup the chain of trust
 
-- `U-Boot <https://source.denx.de/u-boot/u-boot>`
-- `OP-TEE <https://github.com/OP-TEE>`
-- `TF-A <https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git/>`
-- `firmware TPM <https://github.com/microsoft/ms-tpm-20-ref>`
-- `StandAloneMM from EDK2 <https://github.com/tianocore/edk2-platforms.git>`
-- `SCP <https://github.com/ARM-software/SCP-firmware>`
+- `U-Boot <https://source.denx.de/u-boot/u-boot>`_
+- `OP-TEE <https://github.com/OP-TEE>`_
+- `TF-A <https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git/>`_
+- `firmware TPM <https://github.com/microsoft/ms-tpm-20-ref>`_
+- `StandAloneMM from EDK2 <https://github.com/tianocore/edk2-platforms.git>`_
+- `SCP <https://github.com/ARM-software/SCP-firmware>`_
 
 
 Board Support
@@ -34,14 +34,14 @@ Board Support
 Supported platform features and software components
 ===================================================
 
-======================== ===========  =================== ======================== ===========
-Board                    FSBL         Secure Boot         Measured Boot            A/B updates
-======================== ===========  =================== ======================== ===========
-QEMU                     TF-A         Yes (Built in vars) Yes                      No
-DeveloperBox             SCP + TF-A   Yes                 Yes [fTPM]_              WIP
-stm32mp157c-dk2          TF-A         Yes                 No                       WIP
-stm32mp157c-ev1          TF-A         Yes                 No                       WIP
-Rockpi4                  U-Boot SPL   Yes                 Yes [fTPM]_              No
-Raspberry Pi4            Proprietary  Yes                 Yes (needs SPI TPM)      No
-Xilinx kv260 starter kit U-Boot SPL   Yes                 Yes                      WIP
-======================== ===========  =================== ======================== ===========
+======================== ============  =================== ======================== ===========
+Board                    FSBL          Secure Boot         Measured Boot            A/B updates
+======================== ============  =================== ======================== ===========
+QEMU                     TF-A          Yes (Built in vars) Yes                      No
+DeveloperBox             SCP + TF-A    Yes                 Yes [fTPM]_              WIP
+stm32mp157c-dk2          TF-A          Yes                 No                       WIP
+stm32mp157c-ev1          TF-A          Yes                 No                       WIP
+Rockpi4                  U-Boot SPL    Yes                 Yes [fTPM]_              No
+Raspberry Pi4            Proprietary   Yes                 Yes (needs SPI TPM)      No
+Xilinx kv260 starter kit U-Boot SPL    Yes                 Yes                      WIP
+======================== ============  =================== ======================== ===========
