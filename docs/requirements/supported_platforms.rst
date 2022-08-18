@@ -37,11 +37,38 @@ Supported platform features and software components
 ======================== ============  =================== ======================== ===========
 Board                    FSBL          Secure Boot         Measured Boot            A/B updates
 ======================== ============  =================== ======================== ===========
-QEMU                     TF-A          Yes (Built in vars) Yes                      No
-DeveloperBox             SCP + TF-A    Yes                 Yes [fTPM]_              WIP
-stm32mp157c-dk2          TF-A          Yes                 No                       WIP
-stm32mp157c-ev1          TF-A          Yes                 No                       WIP
-Rockpi4                  U-Boot SPL    Yes                 Yes [fTPM]_              No
-Raspberry Pi4            Proprietary   Yes                 Yes (needs SPI TPM)      No
-Xilinx kv260 starter kit U-Boot SPL    Yes                 Yes                      WIP
+QEMU                     TF-A          Yes (Built-in vars) Yes                      No
+DeveloperBox             SCP + TF-A    Yes (RPMB vars)     Yes [fTPM]_              WIP
+stm32mp157c-dk2          TF-A          Yes (Built-in vars) No                       WIP
+stm32mp157c-ev1          TF-A          Yes (RPMB vars)     No                       WIP
+Rockpi4                  U-Boot SPL    Yes (RPMB vars)     Yes [fTPM]_              No
+Raspberry Pi4            Proprietary   Yes (Built-in vars) Yes (needs SPI TPM)      No
+Xilinx kv260 starter kit U-Boot SPL    Yes (Built-in vars) Yes                      WIP
 ======================== ============  =================== ======================== ===========
+
+.. uml::
+
+    object BL2 {
+        U-Boot SPL
+	    or
+        TF-A BL2
+    }
+    object BL31 {
+        Secure Monitor
+    }
+    object BL32 {
+        OP-TEE
+	    fTPM
+	    StandAloneMM
+    }
+    object BL33 {
+	    U-Boot
+    }
+    object OS {
+        OS with UEFI
+    }
+    
+    BL2 --> BL31
+    BL2 --> BL32
+    BL2 --> BL33
+    BL33--> OS
