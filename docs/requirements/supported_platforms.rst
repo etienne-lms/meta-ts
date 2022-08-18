@@ -73,4 +73,4 @@ A high level overview of the boot chain looks will look like this
     BL2 --> BL31
     BL2 --> BL32
     BL2 --> BL33
-    BL33--> OS : Label UEFI Secure and Measured Boot
+    BL33--> OS : UEFI Secure and Measured Boot
