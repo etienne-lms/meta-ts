@@ -1,0 +1,201 @@
+From c941d835a85255ff81a21c72069c3a9fc9a8a255 Mon Sep 17 00:00:00 2001
+From: Jerome Forissier <jerome.forissier@linaro.org>
+Date: Fri, 3 Jun 2022 09:25:48 +0100
+Subject: [PATCH 1/2] spl: fit: add config option for temporary buffer when
+ loading image
+
+When the load address of a FIT image isn't properly aligned,
+spl_load_fit_image() may write past the end of the destination buffer. It
+is not an issue in many cases because the memory happens to be writeable
+and nothing important is present in the overflow. On RockPi4 however there
+is a configuration where a TF-A image (bl31_0xff3b0000.bin) has to be
+loaded into a 8K range of SRAM memory, between 0xff3b0000 and 0xff3b2000.
+The end address is a hard limit, because due to the way the hardware is
+wired, the addresses wrap and any overflow gets written back to 0xff3b0000
+thus overwriting previous data.
+
+To address this problem, introduce a helper function which loads data using
+a temporary buffer allocated on the stack. The size of the buffer is
+defined by SPL_LOAD_FIT_IMAGE_BUFFER_SIZE (default 0x0 or disabled).
+
+Co-developed-by: Xavier Drudis Ferran <xdrudis@tinet.cat>
+Signed-off-by: Xavier Drudis Ferran <xdrudis@tinet.cat>
+Signed-off-by: Jerome Forissier <jerome.forissier@linaro.org>
+---
+ common/spl/Kconfig   | 45 +++++++++++++++++++++++++
+ common/spl/spl_fit.c | 79 ++++++++++++++++++++++++++++++++++++++++----
+ 2 files changed, 118 insertions(+), 6 deletions(-)
+
+diff --git a/common/spl/Kconfig b/common/spl/Kconfig
+index 50ff113cab..d95141a6f6 100644
+--- a/common/spl/Kconfig
++++ b/common/spl/Kconfig
+@@ -1339,6 +1339,51 @@ config SPL_OPENSBI_LOAD_ADDR
+ 	help
+ 	  Load address of the OpenSBI binary.
+ 
++config SPL_LOAD_FIT_IMAGE_BUFFER_SIZE
++	hex "Read unaligned external FIT images to a temporary buffer in SPL"
++	default 0x0
++	depends on SPL_LOAD_FIT
++	help
++	  An aligned FIT image is such that it starts at the beginning
++	  of a block in media and has a load_addr in its FIT header
++	  that is DMA aligned in RAM. These aligned images can be read
++	  directly from media to RAM. Unaligned external FIT images
++	  are those that need reading some extra data before and/or after
++	  the image because they don't occupy fully the blocks they're
++	  in in media, or their destination is not DMA aligned and must
++	  be read somewhere aligned before copying them to load_addr.
++
++	  With this option set to 0x0 full blocks will just be read in
++	  the closest DMA aligned address, and the unaligned image
++	  inside those read blocks will later be copied to
++	  load_addr. Meanwhile memory outside [load_addr,
++	  load_addr+length) will have been written. That's no problem
++	  when the block length, image size and load_addr have been
++	  taken into account when laying out memory.
++
++	  But in some cases not all memory is writable, or undesired
++	  effects arise when writing outside [load_addr,
++	  load_addr+length). For instance, in RK3399, one of the
++	  images is ATF2, of size 8KiB which should be loaded into
++	  INTMEM1, at address 0xff3b0000. This address is DMA aligned
++	  but tight. It maps to a 8KiB SRAM area. If the image on
++	  media is not block aligned some extra bytes get read before
++	  and after, and everything extra written in
++	  0xff3b2000-0xff3bffff corrupts SRAM at
++	  0xff3b0000-0xff3b1fff before the image is memcpyied in place.
++
++	  With this option set to a nonzero value a DMA aligned buffer
++	  will be allocated on the stack and the image will be read
++	  in chuncks of blocks to this buffer, with each chunk being
++	  memcpyied to [load_addr,load_addr+length), so never writing
++	  outside the destination area.
++
++	  The advantage of enabling this option is safety, and the
++	  disadvantage is more stack use and slower image load (one read
++	  per chunk instead of just one).
++
++	  The default is 0x0 to replicate previous behaviour.
++
+ config TPL
+ 	bool
+ 	depends on SUPPORT_TPL
+diff --git a/common/spl/spl_fit.c b/common/spl/spl_fit.c
+index 1bbf824684..56775fd744 100644
+--- a/common/spl/spl_fit.c
++++ b/common/spl/spl_fit.c
+@@ -12,6 +12,7 @@
+ #include <log.h>
+ #include <malloc.h>
+ #include <mapmem.h>
++#include <memalign.h>
+ #include <spl.h>
+ #include <sysinfo.h>
+ #include <asm/cache.h>
+@@ -218,6 +219,64 @@ static int get_aligned_image_size(struct spl_load_info *info, int data_size,
+ 	return (data_size + info->bl_len - 1) / info->bl_len;
+ }
+ 
++#if (CONFIG_SPL_LOAD_FIT_IMAGE_BUFFER_SIZE != 0x0)
++static int load_with_tmpbuf(struct spl_load_info *info, ulong load_addr,
++			    ulong sector, int offs, size_t len)
++{
++	ALLOC_CACHE_ALIGN_BUFFER(u8, buf,
++				 CONFIG_SPL_LOAD_FIT_IMAGE_BUFFER_SIZE);
++	void *dst = (void *)load_addr;
++	int nsect = (len + offs + info->bl_len - 1) / info->bl_len;
++	int bufsect = (CONFIG_SPL_LOAD_FIT_IMAGE_BUFFER_SIZE) / info->bl_len;
++	size_t sz, tail = 0;
++
++	if (offs) {
++		sz = info->bl_len - offs;
++		if (sz > len)
++			sz = len;
++		if (info->read(info, sector, 1, buf) != 1)
++			return -EIO;
++		memcpy(dst, buf + offs, sz);
++		dst += sz;
++		sector++;
++		nsect--;
++	}
++
++	if (nsect) {
++		tail = (len + offs) % info->bl_len;
++		nsect--;
++	}
++
++	while (nsect) {
++		int n = nsect;
++
++		if (n > bufsect)
++			n = bufsect;
++		if (info->read(info, sector, n, buf) != n)
++			return -EIO;
++		sz = n * info->bl_len;
++		memcpy(dst, buf, sz);
++		dst += sz;
++		sector += n;
++		nsect -= n;
++	}
++
++	if (tail) {
++		if (info->read(info, sector, 1, buf) != 1)
++			return -EIO;
++		memcpy(dst, buf, tail);
++	}
++
++	return 0;
++}
++#else
++static int load_with_tmpbuf(struct spl_load_info *info, ulong load_addr,
++			    ulong sector, int offs, size_t len)
++{
++	return -ENOENT;
++}
++#endif
++
+ /**
+  * spl_load_fit_image(): load the image described in a certain FIT node
+  * @info:	points to information about the device to load data from
+@@ -236,6 +295,7 @@ static int spl_load_fit_image(struct spl_load_info *info, ulong sector,
+ 			      const struct spl_fit_info *ctx, int node,
+ 			      struct spl_image_info *image_info)
+ {
++	int ret;
+ 	int offset;
+ 	size_t length;
+ 	int len;
+@@ -298,15 +358,22 @@ static int spl_load_fit_image(struct spl_load_info *info, ulong sector,
+ 
+ 		overhead = get_aligned_image_overhead(info, offset);
+ 		nr_sectors = get_aligned_image_size(info, length, offset);
+-
+-		if (info->read(info,
+-			       sector + get_aligned_image_offset(info, offset),
+-			       nr_sectors, src_ptr) != nr_sectors)
+-			return -EIO;
++		sector += get_aligned_image_offset(info, offset);
++		if (CONFIG_SPL_LOAD_FIT_IMAGE_BUFFER_SIZE) {
++			ret = load_with_tmpbuf(info, load_addr, sector,
++					       overhead, len);
++			if (ret < 0)
++				return ret;
++			src = (void *)load_addr;
++		} else {
++			if (info->read(info, sector, nr_sectors,
++				       src_ptr) != nr_sectors)
++				return -EIO;
++			src = src_ptr + overhead;
++		}
+ 
+ 		debug("External data: dst=%p, offset=%x, size=%lx\n",
+ 		      src_ptr, offset, (unsigned long)length);
+-		src = src_ptr + overhead;
+ 	} else {
+ 		/* Embedded data */
+ 		if (fit_image_get_data(fit, node, &data, &length)) {
+-- 
+2.34.1
+

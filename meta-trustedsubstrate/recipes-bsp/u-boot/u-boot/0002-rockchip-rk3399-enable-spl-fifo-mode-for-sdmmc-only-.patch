@@ -1,0 +1,40 @@
+From 9fb68ec14eb50fb989d2c85d7319508febf0ca72 Mon Sep 17 00:00:00 2001
+From: Jerome Forissier <jerome.forissier@linaro.org>
+Date: Thu, 9 Jun 2022 11:07:11 +0200
+Subject: [PATCH 2/2] rockchip: rk3399: enable spl-fifo-mode for sdmmc only
+ when needed
+
+Commit 5c606ca35c42 ("rockchip: rk3399: enable spl-fifo-mode for sdmmc")
+mentions that the RK3399 SoC can't do DMA between SDMMC and SRAM.
+According to the TRM "7.3.2 Embedded SRAM access path" [1], only the
+8KB SRAM at 0xff3b0000 (INTMEM1) is in this situation. The 192KB SRAM
+can be accessed by both DMA controllers.
+
+Assuming the only use case for writing from MMC to INTMEM1 is loading
+a FIT image, and with the introduction of a temporary buffer for that
+purpose (CONFIG_SPL_LOAD_FIT_IMAGE_BUFFER_SIZE), spl-fifo-mode is not
+needed anymore and DMA can be enabled safely.
+
+Signed-off-by: Jerome Forissier <jerome.forissier@linaro.org>
+---
+ arch/arm/dts/rk3399-u-boot.dtsi | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm/dts/rk3399-u-boot.dtsi b/arch/arm/dts/rk3399-u-boot.dtsi
+index 716b9a433a..a1b6d6f007 100644
+--- a/arch/arm/dts/rk3399-u-boot.dtsi
++++ b/arch/arm/dts/rk3399-u-boot.dtsi
+@@ -124,8 +124,10 @@
+ &sdmmc {
+ 	u-boot,dm-pre-reloc;
+ 
++#ifndef CONFIG_SPL_LOAD_FIT_IMAGE_BUFFER_SIZE
+ 	/* mmc to sram can't do dma, prevent aborts transferring TF-A parts */
+ 	u-boot,spl-fifo-mode;
++#endif
+ };
+ 
+ &spi1 {
+-- 
+2.34.1
+
