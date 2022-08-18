@@ -4,6 +4,7 @@ Trusted Substrate
 
 Trusted Substrate is a meta-layer in OpenEmbedded aimed towards board makers
 who want to produce an `Arm SystemReady <https://www.arm.com/architecture/system-architectures/systemready-certification-program>`_
+(based on [EBBR]_)
 compliant firmware and ensure a consistent behavior, tamper protection and
 common features across platforms. In a nutshell TrustedSubstrate is building
 firmware for devices which verifies the running software hasn't been tampered

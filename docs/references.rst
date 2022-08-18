@@ -13,3 +13,6 @@ References
 .. [fTPM] `Firmware TPM
    <https://www.microsoft.com/en-us/research/publication/ftpm-software-implementation-tpm-chip/>`_,
    August 2016, `Microsoft <http://www.microsoft.com>`_
+
+.. [SWTPM] `Software TPM
+   <https://github.com/stefanberger/swtpm>`_

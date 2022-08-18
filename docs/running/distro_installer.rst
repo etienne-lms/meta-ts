@@ -46,7 +46,7 @@ QEMU arm64
 
 QEMU can provide a TPM implementation via `Software TPM <https://github.com/stefanberger/swtpm>`_
 
-SWTPM provides a memory mapped device which adheres to the
+[SWTPM]_ provides a memory mapped device which adheres to the
 `TCG TPM Interface Specification <https://trustedcomputinggroup.org/wp-content/uploads/TCG_PCClientTPMInterfaceSpecification_TIS__1-3_27_03212013.pdf>`_
 
 .. code-block:: bash

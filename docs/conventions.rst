@@ -12,6 +12,9 @@ This document uses the following terms and abbreviations.
     EBBR
         Embedded Base Boot Requirements
 
+    FSBL
+        First stage boot loader
+
     TPM
        Trusted Platform Module
 

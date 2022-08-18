@@ -11,7 +11,7 @@ Welcome to Trusted Substrate documentation!
     :maxdepth: 2
    
     general/index
-    hardware/index
+    requirements/index
     building/index
     running/index
     references
