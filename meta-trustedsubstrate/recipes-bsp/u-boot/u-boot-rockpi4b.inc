@@ -8,7 +8,6 @@ SRC_URI:append = " file://0004-phy-rockchip-inno-usb2-fix-hang-when-multiple-con
 SRC_URI:append = " file://0001-rk3399-rock-pi-4b-u-boot-add-optee-node.patch"
 SRC_URI:append = " file://0001-rk3399-rock-pi-4b-u-boot.dtsi-reserve-optee-memory-t.patch"
 SRC_URI:append = " file://0001-tee-optee-bind-ftpm-optee-driver.patch"
-SRC_URI:append = " file://0001-mach-rockchip-make_fit_atf.py-support-OP-TEE-tee.bin.patch"
 SRC_URI:append = " file://0001-rk3399_common-add-dfu_alt_info-for-rockpi4b.patch"
 SRC_URI:append = " file://0001-spl-fit-add-config-option-for-temporary-buffer-when-.patch"
 SRC_URI:append = " file://0002-rockchip-rk3399-enable-spl-fifo-mode-for-sdmmc-only-.patch"
