@@ -5,12 +5,27 @@ Getting the firmware
 Building from source
 ********************
 
-The repository is using ``kas`` a setup tool for bitbake based projects.
-Install the required packages with
+Trusted Substrate depends on a couple of different packages being present in the
+host OS environment to be able to successfully build the firmware. The list of
+packages known to be needed can be found below.
+
+Prerequisites
+=============
+Python packages:
 
 .. code-block:: bash
 
     pip install kas
+
+Debian based distro packages :
+
+.. code-block:: bash
+
+    sudo apt install chrpath diffstat lz4
+
+Building
+========
+
 
 Compiling for different boards is straightforward.
 
