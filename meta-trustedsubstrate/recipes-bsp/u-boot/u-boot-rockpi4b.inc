@@ -12,6 +12,7 @@ SRC_URI:append = " file://0001-rk3399_common-add-dfu_alt_info-for-rockpi4b.patch
 SRC_URI:append = " file://0001-spl-fit-add-config-option-for-temporary-buffer-when-.patch"
 SRC_URI:append = " file://0002-rockchip-rk3399-enable-spl-fifo-mode-for-sdmmc-only-.patch"
 SRC_URI:append = " file://0003-rockchip-make_fit_atf-generate-signed-conf-when-FIT_.patch"
+SRC_URI:append = " file://0001-rockchip-rk3399-add-missing-structures-for-capsule-u.patch"
 
 COMPATIBLE_MACHINE = "rockpi4b"
 
@@ -25,11 +26,11 @@ do_compile:prepend() {
 }
 
 do_compile:append() {
-	${B}/rockpi4b_defconfig/tools/mkeficapsule -i 0x1 -r \
-	${B}/rockpi4b_defconfig/idbloader.img ${B}/rockpi4b_defconfig/idbloader.capsule
+	#${B}/rockpi4b_defconfig/tools/mkeficapsule -i 0x1 -r \
+	#${B}/rockpi4b_defconfig/idbloader.img ${B}/rockpi4b_defconfig/idbloader.capsule
 
-	${B}/rockpi4b_defconfig/tools/mkeficapsule -i 0x2 -r \
-	${B}/rockpi4b_defconfig/u-boot.itb ${B}/rockpi4b_defconfig/u-boot.capsule
+	#${B}/rockpi4b_defconfig/tools/mkeficapsule -i 0x2 -r \
+	#${B}/rockpi4b_defconfig/u-boot.itb ${B}/rockpi4b_defconfig/u-boot.capsule
 
 	export FIT_SIGN_KEY=dev
 	if [ "${FIT_SIGN_KEY}" ]; then {
@@ -61,8 +62,8 @@ do_deploy:append() {
 	mkdir -p ${DEPLOYDIR}
 	cp ${B}/rockpi4b_defconfig/idbloader.img  ${DEPLOYDIR}/idbloader.img
 	cp ${B}/rockpi4b_defconfig/u-boot.itb ${DEPLOYDIR}/u-boot.itb
-	cp ${B}/rockpi4b_defconfig/idbloader.capsule ${DEPLOYDIR}/idbloader.capsule
-	cp ${B}/rockpi4b_defconfig/u-boot.capsule ${DEPLOYDIR}/u-boot.capsule
+	#cp ${B}/rockpi4b_defconfig/idbloader.capsule ${DEPLOYDIR}/idbloader.capsule
+	#cp ${B}/rockpi4b_defconfig/u-boot.capsule ${DEPLOYDIR}/u-boot.capsule
 }
 
 ATF_DEPENDS = " trusted-firmware-a:do_deploy"
