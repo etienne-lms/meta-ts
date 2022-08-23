@@ -1,9 +1,6 @@
 # Generate zynqmp-starter kit style loader binaries
 inherit deploy
 
-SRCREV="4fe629d2e8bbda5f265e870d771b92be26e885f6"
-LIC_FILES_CHKSUM = "file://Licenses/README;md5=2ca5f2c35c8cc335f0a19756634782f1"
-
 SRC_URI:append = " file://xilinx_zynqmp_starter_defconfig"
 SRC_URI:append = " file://pmu_obj.bin"
 SRC_URI:append = " file://pmufw.bin"

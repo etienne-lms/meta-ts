@@ -1,9 +1,6 @@
 # Generate zynqmp-production kit style loader binaries
 inherit deploy
 
-SRCREV="3053b781465711fd05b88ab141b1f2b55a875516"
-LIC_FILES_CHKSUM = "file://Licenses/README;md5=2ca5f2c35c8cc335f0a19756634782f1"
-
 SRC_URI:append = " file://xilinx_zynqmp_production_defconfig"
 SRC_URI:append = " file://pmu_obj.bin"
 SRC_URI:append = " file://pmufw.bin"
