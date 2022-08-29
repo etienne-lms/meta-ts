@@ -1,7 +1,7 @@
 # Machine specific configurations
 
-# 3.17.0
-SRCREV = "f9e550142dd4b33ee1112f5dd64ffa94ba79cefa"
+# 3.18.0
+SRCREV = "1ee647035939e073a2e8dddb727c0f019cc035f1"
 PV .= "+git${SRCREV}"
 
 DEPENDS:append = " dtc-native"
