@@ -19,3 +19,8 @@ Supported platforms:
 
 For more information on using the OpenEmbedded layer look at 
 https://trusted-substrate.readthedocs.io/en/latest/
+
+CI
+--
+
+https://gitlab.com/Linaro/blueprints/ci/#arm-blueprints-ci
