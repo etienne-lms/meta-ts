@@ -18,7 +18,7 @@ extract and rename it
 
 .. code-block:: bash
 
-   unxz ledge-iot-ledge-qemuarm64-<date>.rootfs.wic.gz
+   gunzip ledge-iot-ledge-qemuarm64-<date>.rootfs.wic.gz
    mv ledge-iot-ledge-qemuarm64-<date>.rootfs.wic ledge-iot.wic
 
 Running LEDGE-RP
@@ -53,8 +53,10 @@ QEMU can provide a TPM implementation via `Software TPM <https://github.com/stef
 
     sudo apt install swtpm
 
-    mkdir /tmp/mytpm1 -p swtpm socket --tpmstate dir=/tmp/mytpm1 \
-        --ctrl type=unixio,path=/tmp/mytpm1/swtpm-sock
+    mkdir /tmp/mytpm1 -p 
+    
+    swtpm socket --tpmstate dir=/tmp/mytpm1 \
+        --ctrl type=unixio,path=/tmp/mytpm1/swtpm-sock \
         --log level=0 --tpm2 -t -d
 
 .. code-block:: bash
