@@ -1,0 +1,32 @@
+From 27c907c5c8408e43aae7de8e5c174aae37c8dac5 Mon Sep 17 00:00:00 2001
+From: Etienne Carriere <etienne.carriere@linaro.org>
+Date: Tue, 4 Oct 2022 21:59:54 +0200
+Subject: [PATCH] plat-stm32mp1: conf: fix tzdram default size when w/o rsv-shm
+
+Fix the default TZDRAM size that is 32MByte when CFG_CORE_RESERVED_SHM
+is disable, not 30MByte.
+
+Signed-off-by: Etienne Carriere <etienne.carriere@linaro.org>
+---
+ core/arch/arm/plat-stm32mp1/conf.mk | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/core/arch/arm/plat-stm32mp1/conf.mk b/core/arch/arm/plat-stm32mp1/conf.mk
+index 58fc8e32f..ff4585806 100644
+--- a/core/arch/arm/plat-stm32mp1/conf.mk
++++ b/core/arch/arm/plat-stm32mp1/conf.mk
+@@ -141,7 +141,11 @@ CFG_STM32MP1_SCMI_SHM_BASE ?= 0x2ffff000
+ CFG_STM32MP1_SCMI_SHM_SIZE ?= 0x00001000
+ ifeq ($(CFG_STM32MP15),y)
+ CFG_TZDRAM_START ?= 0xfe000000
++ifeq ($(CFG_CORE_RESERVED_SHM),y)
+ CFG_TZDRAM_SIZE  ?= 0x01e00000
++else
++CFG_TZDRAM_SIZE  ?= 0x02000000
++endif
+ CFG_TZSRAM_START ?= 0x2ffc0000
+ CFG_TZSRAM_SIZE  ?= 0x0003f000
+ ifeq ($(CFG_CORE_RESERVED_SHM),y)
+-- 
+2.25.1
+

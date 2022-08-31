@@ -6,6 +6,7 @@ PV .= "+git${SRCREV_tfa}"
 FILESEXTRAPATHS:prepend := "${THISDIR}/files/stm32mp1:"
 
 SRC_URI:append = " file://fwu_mdata_default.bin "
+SRC_URI:append = " file://0001-feat-stm32mp15-manage-OP-TEE-shared-memory.patch "
 
 TFA_DEBUG = "0"
 TFA_UBOOT = "0"
@@ -38,6 +39,7 @@ EXTRA_OEMAKE += "\
                         BL32_EXTRA1=${RECIPE_SYSROOT}/lib/firmware/tee-pager_v2.bin \
                         BL32_EXTRA2=${RECIPE_SYSROOT}/lib/firmware/tee-pageable_v2.bin \
                         LOG_LEVEL=1 \
+			STM32MP15_OPTEE_RSV_SHM=0 \
                         PSA_FWU_SUPPORT=1 \
 			"
 

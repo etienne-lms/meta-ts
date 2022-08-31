@@ -1,6 +1,8 @@
 DEPENDS += "python3-pycryptodomex-native"
 
-FILESEXTRAPATHS:prepend := "${THISDIR}/files/optee-os/stm32mp157c-dk2:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/files/optee-os/stm32mp1:"
+
+SRC_URI += "file://0001-plat-stm32mp1-conf-fix-tzdram-default-size-when-w-o-.patch"
 
 COMPATIBLE_MACHINE = "stm32mp157c-dk2"
 
@@ -13,6 +15,9 @@ OPTEEOUTPUTMACHINE = "stm32mp1"
 
 # default disable latency benchmarks (over all OP-TEE layers)
 EXTRA_OEMAKE += " CFG_TEE_BENCHMARK=n"
+
+# Disable use of OP-TEE reserved shm
+EXTRA_OEMAKE += " CFG_CORE_RESERVED_SHM=n "
 
 EXTRA_OEMAKE:remove = "CFG_ARM64_core=y"
 EXTRA_OEMAKE:remove = "ta-targets=ta_arm64"
