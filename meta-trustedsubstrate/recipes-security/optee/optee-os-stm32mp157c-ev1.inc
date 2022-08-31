@@ -1,6 +1,8 @@
 DEPENDS += "python3-pycryptodomex-native edk2-firmware"
 
-FILESEXTRAPATHS:prepend := "${THISDIR}/files/optee-os/stm32mp157c-dk2:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/files/optee-os/stm32mp1:"
+
+SRC_URI += "file://0001-plat-stm32mp1-conf-fix-tzdram-default-size-when-w-o-.patch"
 
 COMPATIBLE_MACHINE = "stm32mp157c-ev1"
 
@@ -21,6 +23,9 @@ EXTRA_OEMAKE:remove = "CFG_CORE_HEAP_SIZE=131072 "
 EXTRA_OEMAKE += " CFG_ARM32_core=y ta-targets=ta_arm32 "
 
 EXTRA_OEMAKE += " CFG_EMBED_DTB_SOURCE_FILE=stm32mp157c-ev1.dts "
+
+# Disable use of OP-TEE reserved shm
+EXTRA_OEMAKE:append = " CFG_CORE_RESERVED_SHM=n "
 
 EXTRA_OEMAKE += " HOST_PREFIX=${HOST_PREFIX}"
 EXTRA_OEMAKE += " CROSS_COMPILE=${HOST_PREFIX}"
