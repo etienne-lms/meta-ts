@@ -1,7 +1,14 @@
-From e2d65d1d3a7a8594983514f4208cb110d05122cd Mon Sep 17 00:00:00 2001
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH v2] tee: optee: rework TA bus scanning code
 From: Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Date: Mon, 22 Aug 2022 15:27:07 +0300
-Subject: [PATCH] tee: optee: rework TA bus scanning code
+Date: Mon, 29 Aug 2022 09:33:59 +0300
+Message-Id: <20220829063400.421456-1-ilias.apalodimas@linaro.org>
+To: u-boot@lists.denx.de
+Cc: etienne.carriere@linaro.org, Ilias Apalodimas <ilias.apalodimas@linaro.org>, Jens Wiklander <jens.wiklander@linaro.org>, Patrick Delaunay <patrick.delaunay@foss.st.com>
+List-Id: U-Boot discussion <u-boot.lists.denx.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 
 Late versions of OP-TEE support a pseudo bus.  TAs that behave as
 hardware blocks (e.g TPM, RNG etc) present themselves on a bus which we can
@@ -12,16 +19,25 @@ commit 70812bb83da6 ("tee: optee: bind rng optee driver")
 So let's add a list of devices based on U-Boot Kconfig options that we will
 scan until we properly implement the tee-bus functionality.
 
+While at it change the behaviour of the tee core itself wrt to device
+binding.  If some device binding fails, print a warning instead of
+disabling OP-TEE.
+
 Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Reviewed-by: Jens Wiklander <jens.wiklander@linaro.org>
 ---
- drivers/tee/optee/core.c | 22 +++++++++++++++++++---
- 1 file changed, 19 insertions(+), 3 deletions(-)
+Changes since v1:
+- remove a macro and use ARRAY_SIZE directly
+- print a warning instead of disabling op-tee if a driver binding fails
+
+ drivers/tee/optee/core.c | 23 +++++++++++++++++++----
+ 1 file changed, 19 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/tee/optee/core.c b/drivers/tee/optee/core.c
-index a89d62aaf0b3..48a9b59171cb 100644
+index a89d62aaf0b3..3cc92f09d299 100644
 --- a/drivers/tee/optee/core.c
 +++ b/drivers/tee/optee/core.c
-@@ -31,6 +31,20 @@ struct optee_pdata {
+@@ -31,6 +31,18 @@ struct optee_pdata {
  	optee_invoke_fn *invoke_fn;
  };
  
@@ -33,16 +49,14 @@ index a89d62aaf0b3..48a9b59171cb 100644
 +	{ "optee-rng", "optee-rng" },
 +#endif
 +#ifdef CONFIG_TPM2_FTPM_TEE
-+	{ "ftpm-tee", "ftpm-tee" },
++	{ "ftpm_tee", "ftpm_tee" },
 +#endif
 +};
-+
-+#define MAX_TEE_BUS_DEV_COUNT ARRAY_SIZE(optee_bus_probe)
 +
  struct rpc_param {
  	u32	a0;
  	u32	a1;
-@@ -643,7 +657,7 @@ static int optee_probe(struct udevice *dev)
+@@ -643,7 +655,7 @@ static int optee_probe(struct udevice *dev)
  	struct optee_pdata *pdata = dev_get_plat(dev);
  	u32 sec_caps;
  	struct udevice *child;
@@ -51,19 +65,25 @@ index a89d62aaf0b3..48a9b59171cb 100644
  
  	if (!is_optee_api(pdata->invoke_fn)) {
  		dev_err(dev, "OP-TEE api uid mismatch\n");
-@@ -672,8 +686,10 @@ static int optee_probe(struct udevice *dev)
+@@ -672,10 +684,13 @@ static int optee_probe(struct udevice *dev)
  	 * in U-Boot, the discovery of TA on the TEE bus is not supported:
  	 * only bind the drivers associated to the supported OP-TEE TA
  	 */
 -	if (IS_ENABLED(CONFIG_RNG_OPTEE)) {
 -		ret = device_bind_driver(dev, "optee-rng", "optee-rng", &child);
 +
-+	for (i = 0; i < MAX_TEE_BUS_DEV_COUNT; i++) {
++	for (i = 0; i < ARRAY_SIZE(optee_bus_probe); i++) {
 +		ret = device_bind_driver(dev, optee_bus_probe[i].drv_name,
 +					 optee_bus_probe[i].dev_name, &child);
  		if (ret)
- 			return ret;
+-			return ret;
++			dev_warn(dev, "Failed to bind device %s\n",
++				 optee_bus_probe[i].dev_name);
  	}
+ 
+ 	return 0;
+
 -- 
 2.34.1
+
 
