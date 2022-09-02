@@ -3,8 +3,8 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 # Always increment PR on u-boot config change or patches
 PR="r1.ledge"
 
-#2022.07
-SRCREV="e092e3250270a1016c877da7bdd9384f14b1321e"
+#2022.10-rc3
+SRCREV="67fe8cc0016756f3479288b3f67d59a517e512d5"
 LIC_FILES_CHKSUM = "file://Licenses/README;md5=2ca5f2c35c8cc335f0a19756634782f1"
 
 do_configure:prepend() {
