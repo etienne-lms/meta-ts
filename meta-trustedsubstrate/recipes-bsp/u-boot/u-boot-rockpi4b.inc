@@ -53,6 +53,7 @@ do_compile:append() {
 		./tools/mkimage -E -B 0x8 -p 0x0 -f u-boot.its -k keys \
 			-r -K spl/u-boot-spl.dtb u-boot.itb
 		# Generate idbloader.img which will authenticate u-boot.itb
+		./tools/mkimage -n "rk3399" -T rksd -d tpl/u-boot-tpl.bin tpl/u-boot-tpl-rockchip.bin
 		cat tpl/u-boot-tpl-rockchip.bin spl/u-boot-spl-nodtb.bin \
 			spl/u-boot-spl.dtb > idbloader.img
 	}; fi
