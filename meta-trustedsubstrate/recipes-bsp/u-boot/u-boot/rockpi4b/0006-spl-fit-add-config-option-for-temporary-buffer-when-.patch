@@ -1,7 +1,7 @@
-From c941d835a85255ff81a21c72069c3a9fc9a8a255 Mon Sep 17 00:00:00 2001
+From 20d9da4feda49891718e63f4a295753de69bd660 Mon Sep 17 00:00:00 2001
 From: Jerome Forissier <jerome.forissier@linaro.org>
 Date: Fri, 3 Jun 2022 09:25:48 +0100
-Subject: [PATCH 1/2] spl: fit: add config option for temporary buffer when
+Subject: [PATCH 6/9] spl: fit: add config option for temporary buffer when
  loading image
 
 When the load address of a FIT image isn't properly aligned,
@@ -21,18 +21,19 @@ defined by SPL_LOAD_FIT_IMAGE_BUFFER_SIZE (default 0x0 or disabled).
 Co-developed-by: Xavier Drudis Ferran <xdrudis@tinet.cat>
 Signed-off-by: Xavier Drudis Ferran <xdrudis@tinet.cat>
 Signed-off-by: Jerome Forissier <jerome.forissier@linaro.org>
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
 ---
  common/spl/Kconfig   | 45 +++++++++++++++++++++++++
  common/spl/spl_fit.c | 79 ++++++++++++++++++++++++++++++++++++++++----
  2 files changed, 118 insertions(+), 6 deletions(-)
 
 diff --git a/common/spl/Kconfig b/common/spl/Kconfig
-index 50ff113cab..d95141a6f6 100644
+index 70d97815f0..c26fdbf46a 100644
 --- a/common/spl/Kconfig
 +++ b/common/spl/Kconfig
-@@ -1339,6 +1339,51 @@ config SPL_OPENSBI_LOAD_ADDR
- 	help
- 	  Load address of the OpenSBI binary.
+@@ -1496,6 +1496,51 @@ config SPL_OPENSBI_SCRATCH_OPTIONS
+ 	  Options passed to fw_dynamic, for example SBI_SCRATCH_NO_BOOT_PRINTS or
+ 	  SBI_SCRATCH_DEBUG_PRINTS.
  
 +config SPL_LOAD_FIT_IMAGE_BUFFER_SIZE
 +	hex "Read unaligned external FIT images to a temporary buffer in SPL"
@@ -79,11 +80,11 @@ index 50ff113cab..d95141a6f6 100644
 +
 +	  The default is 0x0 to replicate previous behaviour.
 +
- config TPL
- 	bool
- 	depends on SUPPORT_TPL
+ config SPL_TARGET
+ 	string "Addtional build targets for 'make'"
+ 	default "spl/u-boot-spl.srec" if RCAR_GEN2
 diff --git a/common/spl/spl_fit.c b/common/spl/spl_fit.c
-index 1bbf824684..56775fd744 100644
+index a35be52965..036896fd86 100644
 --- a/common/spl/spl_fit.c
 +++ b/common/spl/spl_fit.c
 @@ -12,6 +12,7 @@
@@ -197,5 +198,5 @@ index 1bbf824684..56775fd744 100644
  		/* Embedded data */
  		if (fit_image_get_data(fit, node, &data, &length)) {
 -- 
-2.34.1
+2.30.2
 

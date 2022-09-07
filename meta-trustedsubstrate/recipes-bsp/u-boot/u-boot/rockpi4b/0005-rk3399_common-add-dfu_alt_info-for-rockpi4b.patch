@@ -1,7 +1,7 @@
-From 87de343e8fb0c8beee80a12b3ac33d8cd37e2763 Mon Sep 17 00:00:00 2001
+From 85fc62fe9977387dcb3ba0276470b66d6a705ec3 Mon Sep 17 00:00:00 2001
 From: Peter Griffin <peter.griffin@linaro.org>
 Date: Fri, 20 May 2022 11:47:52 +0100
-Subject: [PATCH] rk3399_common: add dfu_alt_info for rockpi4b
+Subject: [PATCH 5/9] rk3399_common: add dfu_alt_info for rockpi4b
 
 See notes here:
 https://git.codelinaro.org/linaro/dependable-boot/meta-ts/-/blob/master/docs/README-rockchip.md
@@ -11,15 +11,16 @@ https://u-boot.readthedocs.io/en/v2022.04/develop/uefi/uefi.html?highlight=efide
 On how to generate and apply them.
 
 Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
 ---
  include/configs/rk3399_common.h | 6 ++++++
  1 file changed, 6 insertions(+)
 
 diff --git a/include/configs/rk3399_common.h b/include/configs/rk3399_common.h
-index ed72c8bb6b..94a773414a 100644
+index 2f9aee5819..d089c3f44e 100644
 --- a/include/configs/rk3399_common.h
 +++ b/include/configs/rk3399_common.h
-@@ -43,6 +43,11 @@
+@@ -26,6 +26,11 @@
  
  #ifndef CONFIG_SPL_BUILD
  
@@ -31,7 +32,7 @@ index ed72c8bb6b..94a773414a 100644
  #define ENV_MEM_LAYOUT_SETTINGS \
  	"scriptaddr=0x00500000\0" \
  	"script_offset_f=0xffe000\0" \
-@@ -66,6 +71,7 @@
+@@ -49,6 +54,7 @@
  	"fdtfile=" CONFIG_DEFAULT_FDT_FILE "\0" \
  	"partitions=" PARTS_DEFAULT \
  	ROCKCHIP_DEVICE_SETTINGS \
@@ -40,5 +41,5 @@ index ed72c8bb6b..94a773414a 100644
  	BOOTENV_SF \
  	"altbootcmd=" \
 -- 
-2.25.1
+2.30.2
 

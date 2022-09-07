@@ -1,10 +1,11 @@
-From 2d4d4fe260732877f1d887840c9ccaba4c0734ae Mon Sep 17 00:00:00 2001
+From 9b520c111c66055846da5740f9503b0c1a85fcc6 Mon Sep 17 00:00:00 2001
 From: Peter Griffin <peter.griffin@linaro.org>
 Date: Fri, 18 Feb 2022 14:40:20 +0000
-Subject: [PATCH] rk3399-rock-pi-4b-u-boot: add optee node
+Subject: [PATCH 2/9] rk3399-rock-pi-4b-u-boot: add optee node
 
 Upstream-Status: Submitted (u-boot@lists.denx.de)
 Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
 ---
  arch/arm/dts/rk3399-rock-pi-4b-u-boot.dtsi | 10 ++++++++++
  1 file changed, 10 insertions(+)
@@ -28,5 +29,5 @@ index 85ee5770ad..5640f5afbf 100644
 +
 +};
 -- 
-2.25.1
+2.30.2
 

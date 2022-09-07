@@ -1,14 +1,7 @@
-From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v2] tee: optee: rework TA bus scanning code
+From bcc5d8646cc0b5246d97d5a26d1ad2f32efaa4d3 Mon Sep 17 00:00:00 2001
 From: Ilias Apalodimas <ilias.apalodimas@linaro.org>
 Date: Mon, 29 Aug 2022 09:33:59 +0300
-Message-Id: <20220829063400.421456-1-ilias.apalodimas@linaro.org>
-To: u-boot@lists.denx.de
-Cc: etienne.carriere@linaro.org, Ilias Apalodimas <ilias.apalodimas@linaro.org>, Jens Wiklander <jens.wiklander@linaro.org>, Patrick Delaunay <patrick.delaunay@foss.st.com>
-List-Id: U-Boot discussion <u-boot.lists.denx.de>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH 4/9] tee: optee: rework TA bus scanning code
 
 Late versions of OP-TEE support a pseudo bus.  TAs that behave as
 hardware blocks (e.g TPM, RNG etc) present themselves on a bus which we can
@@ -25,16 +18,13 @@ disabling OP-TEE.
 
 Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
 Reviewed-by: Jens Wiklander <jens.wiklander@linaro.org>
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
 ---
-Changes since v1:
-- remove a macro and use ARRAY_SIZE directly
-- print a warning instead of disabling op-tee if a driver binding fails
-
  drivers/tee/optee/core.c | 23 +++++++++++++++++++----
  1 file changed, 19 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/tee/optee/core.c b/drivers/tee/optee/core.c
-index a89d62aaf0b3..3cc92f09d299 100644
+index a89d62aaf0..1437ba1b67 100644
 --- a/drivers/tee/optee/core.c
 +++ b/drivers/tee/optee/core.c
 @@ -31,6 +31,18 @@ struct optee_pdata {
@@ -82,8 +72,6 @@ index a89d62aaf0b3..3cc92f09d299 100644
  	}
  
  	return 0;
-
 -- 
-2.34.1
-
+2.30.2
 
