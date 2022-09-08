@@ -1,7 +1,7 @@
-From af378c0fdfe5dcdae47295aa150579332b127dd2 Mon Sep 17 00:00:00 2001
+From eabc076984a23821b926ea572a324607cf1558f4 Mon Sep 17 00:00:00 2001
 From: Jerome Forissier <jerome.forissier@linaro.org>
 Date: Fri, 20 May 2022 16:50:23 +0200
-Subject: [PATCH] rockchip: make_fit_atf: generate signed conf when
+Subject: [PATCH 8/9] rockchip: make_fit_atf: generate signed conf when
  FIT_SIGN_KEY is set
 
 Introduce the environment variable FIT_SIGN_KEY which when set is the name
@@ -22,12 +22,13 @@ the FIT image. Usage example (tested on RockPi4B):
         spl/u-boot-spl.dtb > idbloader.img
 
 Signed-off-by: Jerome Forissier <jerome.forissier@linaro.org>
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
 ---
  arch/arm/mach-rockchip/make_fit_atf.py | 49 ++++++++++++++++++--------
  1 file changed, 34 insertions(+), 15 deletions(-)
 
 diff --git a/arch/arm/mach-rockchip/make_fit_atf.py b/arch/arm/mach-rockchip/make_fit_atf.py
-index f3224d2555..e587760ccf 100755
+index 08cfe9f51e..0c1e7e60d9 100755
 --- a/arch/arm/mach-rockchip/make_fit_atf.py
 +++ b/arch/arm/mach-rockchip/make_fit_atf.py
 @@ -28,19 +28,6 @@ DT_HEADER = """
@@ -126,5 +127,5 @@ index f3224d2555..e587760ccf 100755
  def generate_atf_fit_dts_bl31(fit_file, bl31_file_name, tee_file_name, dtbs_file_name):
      segments = unpack_elf(bl31_file_name)
 -- 
-2.34.1
+2.30.2
 

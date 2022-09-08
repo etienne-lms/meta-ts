@@ -1,3 +1,8 @@
+From 4e4b5b1612ddf341b4a145cf717750e3a5789404 Mon Sep 17 00:00:00 2001
+From: Sughosh Ganu <sughosh.ganu@linaro.org>
+Date: Wed, 7 Sep 2022 12:15:19 +0000
+Subject: [PATCH 9/9] u-boot: rk3399: capsule update support
+
 Add support for updating the idbloader and u-boot images through the
 UEFI capsule update functionality. Enable the modules required for
 supporting the functionality.
@@ -24,7 +29,7 @@ Signed-off-by: Sughosh Ganu <sughosh.ganu@linaro.org>
  5 files changed, 214 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm/mach-rockchip/Kconfig b/arch/arm/mach-rockchip/Kconfig
-index 18aff5480b..6d13e7b92e 100644
+index b46cea2f91..619899ff68 100644
 --- a/arch/arm/mach-rockchip/Kconfig
 +++ b/arch/arm/mach-rockchip/Kconfig
 @@ -246,6 +246,7 @@ config ROCKCHIP_RK3399
@@ -246,10 +251,10 @@ index abb76585cf..cc976d9471 100644
 +#endif /* CONFIG_EFI_HAVE_CAPSULE_SUPPORT && CONFIG_EFI_PARTITION */
 +#endif /* !CONFIG_SPL_BUILD */
 diff --git a/configs/rock-pi-4-rk3399_defconfig b/configs/rock-pi-4-rk3399_defconfig
-index 80d1e63b59..ca3e217603 100644
+index f8a57f6838..64ba21154a 100644
 --- a/configs/rock-pi-4-rk3399_defconfig
 +++ b/configs/rock-pi-4-rk3399_defconfig
-@@ -21,6 +21,7 @@ CONFIG_SPL_STACK_R=y
+@@ -30,6 +30,7 @@ CONFIG_SPL_STACK_R=y
  CONFIG_SPL_STACK_R_MALLOC_SIMPLE_LEN=0x10000
  CONFIG_TPL=y
  CONFIG_CMD_BOOTZ=y
@@ -257,7 +262,7 @@ index 80d1e63b59..ca3e217603 100644
  CONFIG_CMD_GPT=y
  CONFIG_CMD_MMC=y
  CONFIG_CMD_PCI=y
-@@ -31,6 +32,7 @@ CONFIG_SPL_OF_CONTROL=y
+@@ -40,6 +41,7 @@ CONFIG_SPL_OF_CONTROL=y
  CONFIG_OF_SPL_REMOVE_PROPS="pinctrl-0 pinctrl-names clock-names interrupt-parent assigned-clocks assigned-clock-rates assigned-clock-parents"
  CONFIG_ENV_IS_IN_MMC=y
  CONFIG_SYS_RELOC_GD_ENV_ADDR=y
@@ -265,17 +270,17 @@ index 80d1e63b59..ca3e217603 100644
  CONFIG_ROCKCHIP_GPIO=y
  CONFIG_SYS_I2C_ROCKCHIP=y
  CONFIG_MISC=y
-@@ -76,3 +78,5 @@ CONFIG_VIDEO_ROCKCHIP=y
+@@ -84,3 +86,5 @@ CONFIG_VIDEO_ROCKCHIP=y
  CONFIG_DISPLAY_ROCKCHIP_HDMI=y
  CONFIG_SPL_TINY_MEMSET=y
  CONFIG_ERRNO_STR=y
 +CONFIG_EFI_CAPSULE_ON_DISK=y
 +CONFIG_EFI_CAPSULE_FIRMWARE_RAW=y
 diff --git a/configs/rock-pi-4c-rk3399_defconfig b/configs/rock-pi-4c-rk3399_defconfig
-index bda4b70dbf..4c89e7e918 100644
+index 9aa7809bd0..3b47f80909 100644
 --- a/configs/rock-pi-4c-rk3399_defconfig
 +++ b/configs/rock-pi-4c-rk3399_defconfig
-@@ -21,6 +21,7 @@ CONFIG_SPL_STACK_R=y
+@@ -30,6 +30,7 @@ CONFIG_SPL_STACK_R=y
  CONFIG_SPL_STACK_R_MALLOC_SIMPLE_LEN=0x10000
  CONFIG_TPL=y
  CONFIG_CMD_BOOTZ=y
@@ -283,7 +288,7 @@ index bda4b70dbf..4c89e7e918 100644
  CONFIG_CMD_GPT=y
  CONFIG_CMD_MMC=y
  CONFIG_CMD_PCI=y
-@@ -31,6 +32,7 @@ CONFIG_SPL_OF_CONTROL=y
+@@ -40,6 +41,7 @@ CONFIG_SPL_OF_CONTROL=y
  CONFIG_OF_SPL_REMOVE_PROPS="pinctrl-0 pinctrl-names clock-names interrupt-parent assigned-clocks assigned-clock-rates assigned-clock-parents"
  CONFIG_ENV_IS_IN_MMC=y
  CONFIG_SYS_RELOC_GD_ENV_ADDR=y
@@ -291,17 +296,17 @@ index bda4b70dbf..4c89e7e918 100644
  CONFIG_ROCKCHIP_GPIO=y
  CONFIG_SYS_I2C_ROCKCHIP=y
  CONFIG_MISC=y
-@@ -76,3 +78,5 @@ CONFIG_VIDEO_ROCKCHIP=y
+@@ -84,3 +86,5 @@ CONFIG_VIDEO_ROCKCHIP=y
  CONFIG_DISPLAY_ROCKCHIP_HDMI=y
  CONFIG_SPL_TINY_MEMSET=y
  CONFIG_ERRNO_STR=y
 +CONFIG_EFI_CAPSULE_ON_DISK=y
 +CONFIG_EFI_CAPSULE_FIRMWARE_RAW=y
 diff --git a/include/configs/rk3399_common.h b/include/configs/rk3399_common.h
-index 8e13737666..28b514a4ea 100644
+index d089c3f44e..2cb5236caf 100644
 --- a/include/configs/rk3399_common.h
 +++ b/include/configs/rk3399_common.h
-@@ -38,6 +38,22 @@
+@@ -24,6 +24,22 @@
  #define CONFIG_SYS_SDRAM_BASE		0
  #define SDRAM_MAX_SIZE			0xf8000000
  
@@ -323,7 +328,7 @@ index 8e13737666..28b514a4ea 100644
 +
  #ifndef CONFIG_SPL_BUILD
  
- #define ENV_MEM_LAYOUT_SETTINGS \
+ # define DFU_ALT_INFO \
 -- 
-2.25.1
+2.30.2
 

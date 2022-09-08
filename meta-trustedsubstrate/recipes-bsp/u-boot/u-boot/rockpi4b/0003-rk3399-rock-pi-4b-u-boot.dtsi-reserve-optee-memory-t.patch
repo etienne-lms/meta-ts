@@ -1,13 +1,17 @@
-From 74557552181bdb211202017dd76285ba48a92515 Mon Sep 17 00:00:00 2001
+From ef30cd8287f2078aac8e52c00ba2c32e93dafb1c Mon Sep 17 00:00:00 2001
 From: Peter Griffin <peter.griffin@linaro.org>
 Date: Mon, 28 Mar 2022 12:34:54 +0100
-Subject: [PATCH] rk3399-rock-pi-4b-u-boot.dtsi: reserve optee memory to avoid
- synchronous aborts in Linux
+Subject: [PATCH 3/9] rk3399-rock-pi-4b-u-boot.dtsi: reserve optee memory to
+ avoid synchronous aborts in Linux
 
 Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
 ---
+ arch/arm/dts/rk3399-rock-pi-4b-u-boot.dtsi | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
 diff --git a/arch/arm/dts/rk3399-rock-pi-4b-u-boot.dtsi b/arch/arm/dts/rk3399-rock-pi-4b-u-boot.dtsi
-index 5640f5afbf2e..0fb8b5d3cdf0 100644
+index 5640f5afbf..9b12b161b4 100644
 --- a/arch/arm/dts/rk3399-rock-pi-4b-u-boot.dtsi
 +++ b/arch/arm/dts/rk3399-rock-pi-4b-u-boot.dtsi
 @@ -12,5 +12,14 @@
@@ -26,5 +30,5 @@ index 5640f5afbf2e..0fb8b5d3cdf0 100644
 +           };
  };
 -- 
-2.25.1
+2.30.2
 
