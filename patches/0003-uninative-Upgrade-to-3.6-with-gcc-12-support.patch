@@ -15,6 +15,8 @@ Signed-off-by: Richard Purdie <richard.purdie@linuxfoundation.org>
  meta/conf/distro/include/yocto-uninative.inc | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)
 
+Upstream-Status: Backport [3d4e5a0b7fdf1d17d308bc1fa7752f934b5b91e5]
+
 diff --git a/meta/conf/distro/include/yocto-uninative.inc b/meta/conf/distro/include/yocto-uninative.inc
 index bfe05ce1eb..411fe45a24 100644
 --- a/meta/conf/distro/include/yocto-uninative.inc
