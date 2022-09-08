@@ -1,29 +1,23 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/u-boot/capsule:"
 
-SRC_URI += " \
-	file://0001-tools-mkeficapsule-output-messages-to-stderr-instead.patch \
-	file://0002-tools-mkeficapsule-rework-the-code-a-little-bit.patch \
-	file://0003-tools-build-mkeficapsule-with-tools-only_defconfig.patch \
-	file://0004-tools-mkeficapsule-add-firmware-image-signing.patch \
-	file://0005-tools-mkeficapsule-add-man-page.patch \
-	file://0006-doc-update-UEFI-document-for-usage-of-mkeficapsule.patch \
-	file://0007-test-py-efi_capsule-add-image-authentication-test.patch \
-	file://0008-tools-mkeficapsule-allow-for-specifying-GUID-explici.patch \
-	file://0009-test-py-efi_capsule-align-with-the-syntax-change-of-.patch \
-	file://0010-test-py-efi_capsule-add-a-test-for-guid-option.patch \
-	file://0011-test-py-efi_capsule-check-the-results-in-case-of-CAP.patch \
-"
+DEPENDS += "ovmf-native"
 
-SRC_URI:append = " file://uefi-certificates/db.key"
-SRC_URI:append = " file://uefi-certificates/db.crt"
+# SRC_URI:append = " file://uefi-certificates/db.key"
+# SRC_URI:append = " file://uefi-certificates/db.crt"
 
 do_compile:append() {
-	${B}/tools/mkeficapsule --raw  --index 0 --instance 0 \
-		--private-key ${WORKDIR}/uefi-certificates/db.key --certificate ${WORKDIR}/uefi-certificates/db.crt \
-		--monotonic-count 1 u-boot.bin u-boot.cap
+	export PYTHONPATH="${STAGING_DIR_NATIVE}/usr/bin/edk2_basetools/BaseTools/Source/Python"
+
+	cd ${B}/${MACHINE}_defconfig
+	cp ${S}/../${MACHINE}/images.json .
+	${HOSTTOOLS_DIR}/python3 ${STAGING_DIR_NATIVE}/usr/bin/edk2_basetools/BaseTools/Source/Python/Capsule/GenerateCapsule.py -j images.json \
+		-e -o ${MACHINE}_fw.capsule \
+		--verbose \
+		--update-image-index 1
+	cd -
 }
 
 do_deploy:append() {
 	mkdir -p ${DEPLOYDIR}
-	cp ${B}/u-boot.cap ${DEPLOYDIR}/u-boot.cap
+	cp ${B}/rockpi4b_defconfig/${MACHINE}_fw.capsule ${DEPLOYDIR}/
 }
