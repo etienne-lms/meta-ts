@@ -1,0 +1,22 @@
+{
+    "Payloads": [
+        {
+            "FwVersion": "1",
+            "Guid": "02f4d760-cfd5-43bd-8e2d-a42acb33c660",
+            "HardwareInstance": "0",
+            "LowestSupportedVersion": "1",
+            "MonotonicCount": "0",
+            "Payload": "idbloader.img",
+            "UpdateImageIndex": "1"
+        },
+	{
+            "FwVersion": "1",
+            "Guid": "4ce292da-1dd8-428d-a1c2-77743ef8b96e",
+            "HardwareInstance": "0",
+            "LowestSupportedVersion": "1",
+            "MonotonicCount": "0",
+            "Payload": "u-boot.itb",
+            "UpdateImageIndex": "2"
+	}
+    ]
+}

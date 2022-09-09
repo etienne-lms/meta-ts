@@ -26,12 +26,6 @@ do_compile:prepend() {
 }
 
 do_compile:append() {
-	#${B}/rockpi4b_defconfig/tools/mkeficapsule -i 0x1 -r \
-	#${B}/rockpi4b_defconfig/idbloader.img ${B}/rockpi4b_defconfig/idbloader.capsule
-
-	#${B}/rockpi4b_defconfig/tools/mkeficapsule -i 0x2 -r \
-	#${B}/rockpi4b_defconfig/u-boot.itb ${B}/rockpi4b_defconfig/u-boot.capsule
-
 	export FIT_SIGN_KEY=dev
 	if [ "${FIT_SIGN_KEY}" ]; then {
 		cd ${B}/rockpi4b_defconfig
@@ -59,12 +53,13 @@ do_compile:append() {
 	}; fi
 }
 
+SRC_URI:append = " file://rockpi4b/images.json"
+require u-boot-capsule.inc
+
 do_deploy:append() {
 	mkdir -p ${DEPLOYDIR}
 	cp ${B}/rockpi4b_defconfig/idbloader.img  ${DEPLOYDIR}/idbloader.img
 	cp ${B}/rockpi4b_defconfig/u-boot.itb ${DEPLOYDIR}/u-boot.itb
-	#cp ${B}/rockpi4b_defconfig/idbloader.capsule ${DEPLOYDIR}/idbloader.capsule
-	#cp ${B}/rockpi4b_defconfig/u-boot.capsule ${DEPLOYDIR}/u-boot.capsule
 }
 
 ATF_DEPENDS = " trusted-firmware-a:do_deploy"
