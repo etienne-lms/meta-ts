@@ -21,13 +21,7 @@ repos:
     patches:
       p1:
         repo : poky
-        path : ../../patches/0001-wic-add-UEFI-kernel-as-UEFI-stub.patch
-      p2:
-        repo : poky
-        path : ../../patches/0002-wic-bootimg-efi-implement-include-path.patch
-      p3:
-        repo : poky
-        path : ../../patches/0003-uninative-Upgrade-to-3.6-with-gcc-12-support.patch
+        path : ../../patches/0001-uninative-Upgrade-to-3.6-with-gcc-12-support.patch
   meta-arm:
     path: layers/meta-arm
     url: git://git.yoctoproject.org/meta-arm
