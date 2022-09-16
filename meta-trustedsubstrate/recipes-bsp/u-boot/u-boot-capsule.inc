@@ -12,8 +12,7 @@ do_compile:append() {
 	cp ${S}/../${MACHINE}/images.json .
 	${HOSTTOOLS_DIR}/python3 ${STAGING_DIR_NATIVE}/usr/bin/edk2_basetools/BaseTools/Source/Python/Capsule/GenerateCapsule.py -j images.json \
 		-e -o ${MACHINE}_fw.capsule \
-		--verbose \
-		--update-image-index 1
+		--verbose
 	cd -
 }
 
