@@ -21,6 +21,14 @@ Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
  arch/arm/dts/rk3399-u-boot.dtsi | 2 ++
  1 file changed, 2 insertions(+)
 
+Note: this patch also works around a bug in the MMC FIFO mode which
+would cause read errors and prevent the board from booting most of the
+time. It is not needed anymore once the fix [1] is merged upstream
+(although DMA mode does improve the boot speed marginally -- the FIT
+verification is ~0.5 s faster, 5.5 s. vs 6 s).
+
+[1] https://patchwork.ozlabs.org/project/uboot/patch/20220915175656.3447093-1-john@metanate.com/#2965950
+
 diff --git a/arch/arm/dts/rk3399-u-boot.dtsi b/arch/arm/dts/rk3399-u-boot.dtsi
 index 3c1a15fe51..26857b2491 100644
 --- a/arch/arm/dts/rk3399-u-boot.dtsi
