@@ -1,3 +1,5 @@
+inherit python3native
+
 DEPENDS += " python3-pyopenssl-native"
 
 do_compile:prepend() {
