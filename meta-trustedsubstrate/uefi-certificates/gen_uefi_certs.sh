@@ -1,4 +1,5 @@
 #/bin/sh
+set -eux
 
 #Create PK
 openssl req -x509 -sha256 -newkey rsa:2048 -subj /CN=Linaro_LEDGE/ -keyout PK.key -out PK.crt -nodes -days 3650
