@@ -1,16 +1,16 @@
 # Generate zynqmp-production kit style loader binaries
 inherit deploy
 
-SRC_URI:append = " file://xilinx_zynqmp_production_defconfig"
-SRC_URI:append = " file://pmu_obj.bin"
-SRC_URI:append = " file://pmufw.bin"
-SRC_URI:append = " file://0001-som-Kria-specific-setting-configurations.patch"
+SRC_URI += "file://xilinx_zynqmp_production_defconfig"
+SRC_URI += "file://pmu_obj.bin"
+SRC_URI += "file://pmufw.bin"
+SRC_URI += "file://0001-som-Kria-specific-setting-configurations.patch"
 
 COMPATIBLE_MACHINE = "zynqmp-production"
 
-DEPENDS:append = " trusted-firmware-a"
-DEPENDS:append = " xxd-native"
-DEPENDS:append = " u-boot-mkimage-native "
+DEPENDS += "trusted-firmware-a"
+DEPENDS += "xxd-native"
+DEPENDS += "u-boot-mkimage-native "
 
 do_compile:prepend() {
     cp ${S}/../pmufw.bin ${S}/
