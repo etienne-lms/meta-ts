@@ -14,18 +14,21 @@ repos:
   poky:
     path: layers/poky
     url: https://git.yoctoproject.org/git/poky
-    refspec: 0539b563c6f41fef383429a13c28bf918231d404
+    refspec: d64bef1c7d713b92a51228e5ade945835e5a94a4
     layers:
       meta:
       meta-poky:
     patches:
       p1:
         repo : poky
-        path : ../../patches/0001-uninative-Upgrade-to-3.6-with-gcc-12-support.patch
+        path : ../../patches/0001-u-boot-switch-from-append-to-in-SRC_URI.patch
+      p2:
+        repo : poky
+        path : ../../patches/0001-openssl-relocation-fixes-for-finding-modules-etc.patch
   meta-arm:
     path: layers/meta-arm
     url: git://git.yoctoproject.org/meta-arm
-    refspec: 3ee7d019898854f776f95ed31f4b7ea8c8a73dfe
+    refspec: 0a5eba13d81f5c5722a13b816193ebf93c0fd198
     layers:
       meta-arm:
       meta-arm-bsp:

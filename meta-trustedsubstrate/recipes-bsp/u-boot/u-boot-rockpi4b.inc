@@ -3,16 +3,16 @@ inherit deploy
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/u-boot/rockpi4b:"
 
-SRC_URI:append = " file://rockpi4b_defconfig"
-SRC_URI:append = " file://0001-phy-rockchip-inno-usb2-fix-hang-when-multiple-contro.patch"
-SRC_URI:append = " file://0002-rk3399-rock-pi-4b-u-boot-add-optee-node.patch"
-SRC_URI:append = " file://0003-rk3399-rock-pi-4b-u-boot.dtsi-reserve-optee-memory-t.patch"
-SRC_URI:append = " file://0004-tee-optee-rework-TA-bus-scanning-code.patch"
-SRC_URI:append = " file://0005-rk3399_common-add-dfu_alt_info-for-rockpi4b.patch"
-SRC_URI:append = " file://0006-spl-fit-add-config-option-for-temporary-buffer-when-.patch"
-SRC_URI:append = " file://0007-rockchip-rk3399-enable-spl-fifo-mode-for-sdmmc-only-.patch"
-SRC_URI:append = " file://0008-rockchip-make_fit_atf-generate-signed-conf-when-FIT_.patch"
-SRC_URI:append = " file://0009-u-boot-rk3399-capsule-update-support.patch"
+SRC_URI += "file://rockpi4b_defconfig"
+SRC_URI += "file://0001-phy-rockchip-inno-usb2-fix-hang-when-multiple-contro.patch"
+SRC_URI += "file://0002-rk3399-rock-pi-4b-u-boot-add-optee-node.patch"
+SRC_URI += "file://0003-rk3399-rock-pi-4b-u-boot.dtsi-reserve-optee-memory-t.patch"
+SRC_URI += "file://0004-tee-optee-rework-TA-bus-scanning-code.patch"
+SRC_URI += "file://0005-rk3399_common-add-dfu_alt_info-for-rockpi4b.patch"
+SRC_URI += "file://0006-spl-fit-add-config-option-for-temporary-buffer-when-.patch"
+SRC_URI += "file://0007-rockchip-rk3399-enable-spl-fifo-mode-for-sdmmc-only-.patch"
+SRC_URI += "file://0008-rockchip-make_fit_atf-generate-signed-conf-when-FIT_.patch"
+SRC_URI += "file://0009-u-boot-rk3399-capsule-update-support.patch"
 
 COMPATIBLE_MACHINE = "rockpi4b"
 
