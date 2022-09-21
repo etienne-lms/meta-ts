@@ -5,3 +5,5 @@ bootloader --ptable gpt
 part fsbl1 --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=fsbl1 --sourceparams="file=${DEPLOY_DIR_IMAGE}/tf-a-stm32mp157c-dk2.stm32" --ondisk mmcblk --part-type 0x8301 --fixed-size 256K
 part fsbl2 --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=fsbl2 --sourceparams="file=${DEPLOY_DIR_IMAGE}/tf-a-stm32mp157c-dk2.stm32" --ondisk mmcblk --part-type 0x8301 --fixed-size 256K
 part ssbl  --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=fip --sourceparams="file=${DEPLOY_DIR_IMAGE}/fip.bin" --ondisk mmcblk --part-type 0x8301 --fixed-size 2048K
+part ubootenv --part-name=u-boot-env --ondisk mmcblk --part-type 0x8301 --fixed-size 1M
+part esp   --fstype=vfat --part-name=ESP --ondisk mmcblk --part-type 0xef00 --fixed-size 32M

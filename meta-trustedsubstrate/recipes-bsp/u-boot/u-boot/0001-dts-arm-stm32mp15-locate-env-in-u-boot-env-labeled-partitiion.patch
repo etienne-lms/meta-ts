@@ -1,0 +1,36 @@
+From 15406cf0996547983cb7a1b70bdb0230dbeb46c6 Mon Sep 17 00:00:00 2001
+From: Etienne Carriere <etienne.carriere@linaro.org>
+Date: Thu, 29 Sep 2022 15:51:55 +0200
+Subject: dts: arm: stm32mp15: locate env in u-boot-env labeled partitiion
+
+Changes partition label where U-Boot env is stored from "fip" (which
+partition already stores TF-A FIP boot image) to "u-boot-env".
+
+Signed-off-by: Etienne Carriere <etienne.carriere@linaro.org>
+
+diff --git a/arch/arm/dts/stm32mp157a-dk1-u-boot.dtsi b/arch/arm/dts/stm32mp157a-dk1-u-boot.dtsi
+index 15a04ae927..4280f4d196 100644
+--- a/arch/arm/dts/stm32mp157a-dk1-u-boot.dtsi
++++ b/arch/arm/dts/stm32mp157a-dk1-u-boot.dtsi
+@@ -15,7 +15,7 @@
+ 	config {
+ 		u-boot,boot-led = "heartbeat";
+ 		u-boot,error-led = "error";
+-		u-boot,mmc-env-partition = "fip";
++		u-boot,mmc-env-partition = "u-boot-env";
+ 		st,adc_usb_pd = <&adc1 18>, <&adc1 19>;
+ 		st,fastboot-gpios = <&gpioa 13 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+ 		st,stm32prog-gpios = <&gpioa 14 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+diff --git a/arch/arm/dts/stm32mp157c-ed1-u-boot.dtsi b/arch/arm/dts/stm32mp157c-ed1-u-boot.dtsi
+index 408abaf52f..01de3e23d6 100644
+--- a/arch/arm/dts/stm32mp157c-ed1-u-boot.dtsi
++++ b/arch/arm/dts/stm32mp157c-ed1-u-boot.dtsi
+@@ -15,7 +15,7 @@
+ 	config {
+ 		u-boot,boot-led = "heartbeat";
+ 		u-boot,error-led = "error";
+-		u-boot,mmc-env-partition = "fip";
++		u-boot,mmc-env-partition = "u-boot-env";
+ 		st,fastboot-gpios = <&gpioa 13 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+ 		st,stm32prog-gpios = <&gpioa 14 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+ 	};
