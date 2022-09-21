@@ -1,0 +1,63 @@
+From: Sughosh Ganu <sughosh.ganu@linaro.org>
+Subject: [PATCH v12 08/15] event: Add an event for main_loop
+Date: Mon,  3 Oct 2022 19:54:20 +0530
+
+Add an event type EVT_MAIN_LOOP that can be used for registering
+events that need to be run after the platform has been initialised and
+before the main_loop function is called.
+
+Signed-off-by: Sughosh Ganu <sughosh.ganu@linaro.org>
+Reviewed-by: Simon Glass <sjg@chromium.org>
+---
+Changes since V11: None
+
+ common/board_r.c | 3 +++
+ common/event.c   | 3 +++
+ include/event.h  | 3 +++
+ 3 files changed, 9 insertions(+)
+
+diff --git a/common/board_r.c b/common/board_r.c
+index 00926dcb1e..bb8ee2f6ad 100644
+--- a/common/board_r.c
++++ b/common/board_r.c
+@@ -576,6 +576,9 @@ static int run_main_loop(void)
+ #ifdef CONFIG_SANDBOX
+ 	sandbox_main_loop_init();
+ #endif
++
++	event_notify_null(EVT_MAIN_LOOP);
++
+ 	/* main_loop() can return to retry autoboot, if so just run it again */
+ 	for (;;)
+ 		main_loop();
+diff --git a/common/event.c b/common/event.c
+index 3e34550978..231b9e6ffd 100644
+--- a/common/event.c
++++ b/common/event.c
+@@ -38,6 +38,9 @@ const char *const type_name[] = {
+ 
+ 	/* fdt hooks */
+ 	"ft_fixup",
++
++	/* main loop events */
++	"main_loop",
+ };
+ 
+ _Static_assert(ARRAY_SIZE(type_name) == EVT_COUNT, "event type_name size");
+diff --git a/include/event.h b/include/event.h
+index e8f2f55c63..8089b464b1 100644
+--- a/include/event.h
++++ b/include/event.h
+@@ -34,6 +34,9 @@ enum event_t {
+ 	/* Device tree fixups before booting */
+ 	EVT_FT_FIXUP,
+ 
++	/* To be called once, before calling main_loop() */
++	EVT_MAIN_LOOP,
++
+ 	EVT_COUNT
+ };
+ 
+-- 
+2.34.1
+

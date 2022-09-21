@@ -1,0 +1,279 @@
+From: Sughosh Ganu <sughosh.ganu@linaro.org>
+Subject: [PATCH v12 09/15] FWU: Add boot time checks as highlighted by the FWU specification
+Date: Mon,  3 Oct 2022 19:54:21 +0530
+
+The FWU Multi Bank Update specification requires the Update Agent to
+carry out certain checks at the time of platform boot. The Update
+Agent is the component which is responsible for updating the firmware
+components and maintaining and keeping the metadata in sync.
+
+The spec requires that the Update Agent perform the following checks
+at the time of boot
+* Sanity check of both the metadata copies maintained by the platform.
+* Get the boot index passed to U-Boot by the prior stage bootloader
+  and use this value for metadata bookkeeping.
+* Check if the system is booting in Trial State. If the system boots
+  in the Trial State for more than a specified number of boot counts,
+  change the Active Bank to be booting the platform from.
+
+Call these checks through the main loop event at the time of platform
+boot.
+
+Signed-off-by: Sughosh Ganu <sughosh.ganu@linaro.org>
+Reviewed-by: Etienne Carriere <etienne.carriere@linaro.org>
+---
+Changes since V11:
+* Remove the superfluous braces in fwu_boottime_checks()
+
+ include/fwu.h         |  13 +++
+ lib/fwu_updates/fwu.c | 191 +++++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 203 insertions(+), 1 deletion(-)
+
+diff --git a/include/fwu.h b/include/fwu.h
+index 71a03cf70b..2effa7da38 100644
+--- a/include/fwu.h
++++ b/include/fwu.h
+@@ -253,4 +253,17 @@ int fwu_plat_get_update_index(uint *update_idx);
+  *
+  */
+ void fwu_plat_get_bootidx(uint *boot_idx);
++
++/**
++ * fwu_update_checks_pass() - Check if FWU update can be done
++ *
++ * Check if the FWU update can be executed. The updates are
++ * allowed only when the platform is not in Trial State and
++ * the boot time checks have passed
++ *
++ * Return: 1 if OK, 0 on error
++ *
++ */
++u8 fwu_update_checks_pass(void);
++
+ #endif /* _FWU_H_ */
+diff --git a/lib/fwu_updates/fwu.c b/lib/fwu_updates/fwu.c
+index 70482d14a0..b14c0dfadd 100644
+--- a/lib/fwu_updates/fwu.c
++++ b/lib/fwu_updates/fwu.c
+@@ -4,10 +4,19 @@
+  */
+ 
+ #include <dm.h>
++#include <efi.h>
+ #include <efi_loader.h>
++#include <efi_variable.h>
++#include <event.h>
+ #include <fwu.h>
+ #include <fwu_mdata.h>
+-#include <log.h>
++#include <malloc.h>
++
++#include <linux/errno.h>
++#include <linux/types.h>
++
++static u8 trial_state;
++static u8 boottime_check;
+ 
+ #include <linux/errno.h>
+ #include <linux/types.h>
+@@ -18,6 +27,112 @@ enum {
+ 	IMAGE_ACCEPT_CLEAR,
+ };
+ 
++static int trial_counter_update(u16 *trial_state_ctr)
++{
++	bool delete;
++	u32 var_attr;
++	efi_status_t status;
++	efi_uintn_t var_size;
++
++	delete = !trial_state_ctr ? true : false;
++	var_size = !trial_state_ctr ? 0 : (efi_uintn_t)sizeof(*trial_state_ctr);
++	var_attr = !trial_state_ctr ? 0 : EFI_VARIABLE_NON_VOLATILE |
++		EFI_VARIABLE_BOOTSERVICE_ACCESS;
++	status = efi_set_variable_int(u"TrialStateCtr",
++				      &efi_global_variable_guid,
++				      var_attr,
++				      var_size, trial_state_ctr, false);
++
++	if ((delete && (status != EFI_NOT_FOUND &&
++			status != EFI_SUCCESS)) ||
++	    (!delete && status != EFI_SUCCESS))
++		return -1;
++
++	return 0;
++}
++
++static int in_trial_state(struct fwu_mdata *mdata)
++{
++	u32 i, active_bank;
++	struct fwu_image_entry *img_entry;
++	struct fwu_image_bank_info *img_bank_info;
++
++	active_bank = mdata->active_index;
++	img_entry = &mdata->img_entry[0];
++	for (i = 0; i < CONFIG_FWU_NUM_IMAGES_PER_BANK; i++) {
++		img_bank_info = &img_entry[i].img_bank_info[active_bank];
++		if (!img_bank_info->accepted) {
++			return 1;
++		}
++	}
++
++	return 0;
++}
++
++static int fwu_trial_state_check(struct udevice *dev)
++{
++	int ret;
++	efi_status_t status;
++	efi_uintn_t var_size;
++	u16 trial_state_ctr;
++	u32 var_attributes;
++	struct fwu_mdata mdata = { 0 };
++
++	ret = fwu_get_mdata(dev, &mdata);
++	if (ret)
++		return ret;
++
++	trial_state = in_trial_state(&mdata);
++	if (trial_state) {
++		var_size = (efi_uintn_t)sizeof(trial_state_ctr);
++		log_info("System booting in Trial State\n");
++		var_attributes = EFI_VARIABLE_NON_VOLATILE |
++			EFI_VARIABLE_BOOTSERVICE_ACCESS;
++		status = efi_get_variable_int(u"TrialStateCtr",
++					      &efi_global_variable_guid,
++					      &var_attributes,
++					      &var_size, &trial_state_ctr,
++					      NULL);
++		if (status != EFI_SUCCESS) {
++			log_err("Unable to read TrialStateCtr variable\n");
++			ret = -1;
++			goto out;
++		}
++
++		++trial_state_ctr;
++		if (trial_state_ctr > CONFIG_FWU_TRIAL_STATE_CNT) {
++			log_info("Trial State count exceeded. Revert back to previous_active_index\n");
++			ret = fwu_revert_boot_index();
++			if (ret) {
++				log_err("Unable to revert active_index\n");
++				goto out;
++			}
++
++			/* Delete the TrialStateCtr variable */
++			ret = trial_counter_update(NULL);
++			if (ret) {
++				log_err("Unable to delete TrialStateCtr variable\n");
++				goto out;
++			}
++		} else {
++			ret = trial_counter_update(&trial_state_ctr);
++			if (ret) {
++				log_err("Unable to increment TrialStateCtr variable\n");
++				goto out;
++			}
++		}
++	} else {
++		/* Delete the variable */
++		ret = trial_counter_update(NULL);
++		if (ret) {
++			log_err("Unable to delete TrialStateCtr variable\n");
++		}
++	}
++
++out:
++	return ret;
++}
++
+ static int fwu_get_dev_mdata(struct udevice **dev, struct fwu_mdata *mdata)
+ {
+ 	int ret;
+@@ -28,6 +143,9 @@ static int fwu_get_dev_mdata(struct udevice **dev, struct fwu_mdata *mdata)
+ 		return ret;
+ 	}
+ 
++	if (!mdata)
++		return 0;
++
+ 	ret = fwu_get_mdata(*dev, mdata);
+ 	if (ret < 0)
+ 		log_debug("Unable to get valid FWU metadata\n");
+@@ -389,3 +507,74 @@ __weak int fwu_plat_get_update_index(uint *update_idx)
+ 
+ 	return ret;
+ }
++
++/**
++ * fwu_update_checks_pass() - Check if FWU update can be done
++ *
++ * Check if the FWU update can be executed. The updates are
++ * allowed only when the platform is not in Trial State and
++ * the boot time checks have passed
++ *
++ * Return: 1 if OK, 0 on error
++ *
++ */
++u8 fwu_update_checks_pass(void)
++{
++	return !trial_state && boottime_check;
++}
++
++static int fwu_boottime_checks(void *ctx, struct event *event)
++{
++	int ret;
++	struct udevice *dev;
++	u32 boot_idx, active_idx;
++
++	ret = fwu_get_dev_mdata(&dev, NULL);
++	if (ret)
++		return ret;
++
++	ret = fwu_mdata_check(dev);
++	if (ret)
++		return 0;
++
++	/*
++	 * Get the Boot Index, i.e. the bank from
++	 * which the platform has booted. This value
++	 * gets passed from the ealier stage bootloader
++	 * which booted u-boot, e.g. tf-a. If the
++	 * boot index is not the same as the
++	 * active_index read from the FWU metadata,
++	 * update the active_index.
++	 */
++	fwu_plat_get_bootidx(&boot_idx);
++	if (boot_idx >= CONFIG_FWU_NUM_BANKS) {
++		log_err("Received incorrect value of boot_index\n");
++		return 0;
++	}
++
++	ret = fwu_get_active_index(&active_idx);
++	if (ret) {
++		log_err("Unable to read active_index\n");
++		return 0;
++	}
++
++	if (boot_idx != active_idx) {
++		log_info("Boot idx %u is not matching active idx %u, changing active_idx\n",
++			 boot_idx, active_idx);
++		ret = fwu_set_active_index(boot_idx);
++		if (!ret)
++			boottime_check = 1;
++
++		return 0;
++	}
++
++	if (efi_init_obj_list() != EFI_SUCCESS)
++		return 0;
++
++	ret = fwu_trial_state_check(dev);
++	if (!ret)
++		boottime_check = 1;
++
++	return 0;
++}
++EVENT_SPY(EVT_MAIN_LOOP, fwu_boottime_checks);
+-- 
+2.34.1
+

@@ -1,0 +1,200 @@
+From: Sughosh Ganu <sughosh.ganu@linaro.org>
+Subject: [PATCH v12 11/15] FWU: cmd: Add a command to read FWU metadata
+Date: Mon,  3 Oct 2022 19:54:23 +0530
+
+Add a command to read the metadata as specified in the FWU
+specification and print the fields of the metadata.
+
+Signed-off-by: Sughosh Ganu <sughosh.ganu@linaro.org>
+Reviewed-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Reviewed-by: Etienne Carriere <etienne.carriere@linaro.org>
+---
+Changes since V11: None
+
+ cmd/Kconfig                 |  6 +++
+ cmd/Makefile                |  1 +
+ cmd/fwu_mdata.c             | 79 +++++++++++++++++++++++++++++++++++++
+ doc/usage/cmd/fwu_mdata.rst | 43 ++++++++++++++++++++
+ doc/usage/index.rst         |  1 +
+ 5 files changed, 130 insertions(+)
+ create mode 100644 cmd/fwu_mdata.c
+ create mode 100644 doc/usage/cmd/fwu_mdata.rst
+
+diff --git a/cmd/Kconfig b/cmd/Kconfig
+index 0e0be94f41..af070b5459 100644
+--- a/cmd/Kconfig
++++ b/cmd/Kconfig
+@@ -161,6 +161,12 @@ config CMD_CPU
+ 	  internal name) and clock frequency. Other information may be
+ 	  available depending on the CPU driver.
+ 
++config CMD_FWU_METADATA
++	bool "fwu metadata read"
++	depends on FWU_MULTI_BANK_UPDATE
++	help
++	  Command to read the metadata and dump it's contents
++
+ config CMD_LICENSE
+ 	bool "license"
+ 	select BUILD_BIN2C
+diff --git a/cmd/Makefile b/cmd/Makefile
+index 6e87522b62..ff6e160f4a 100644
+--- a/cmd/Makefile
++++ b/cmd/Makefile
+@@ -76,6 +76,7 @@ obj-$(CONFIG_CMD_FPGA) += fpga.o
+ obj-$(CONFIG_CMD_FPGAD) += fpgad.o
+ obj-$(CONFIG_CMD_FS_GENERIC) += fs.o
+ obj-$(CONFIG_CMD_FUSE) += fuse.o
++obj-$(CONFIG_CMD_FWU_METADATA) += fwu_mdata.o
+ obj-$(CONFIG_CMD_GETTIME) += gettime.o
+ obj-$(CONFIG_CMD_GPIO) += gpio.o
+ obj-$(CONFIG_CMD_HVC) += smccc.o
+diff --git a/cmd/fwu_mdata.c b/cmd/fwu_mdata.c
+new file mode 100644
+index 0000000000..725b4c17d3
+--- /dev/null
++++ b/cmd/fwu_mdata.c
+@@ -0,0 +1,79 @@
++/* SPDX-License-Identifier: GPL-2.0-or-later */
++/*
++ * Copyright (c) 2022, Linaro Limited
++ */
++
++#include <command.h>
++#include <dm.h>
++#include <fwu.h>
++#include <fwu_mdata.h>
++#include <log.h>
++#include <stdio.h>
++#include <stdlib.h>
++
++#include <linux/types.h>
++
++static void print_mdata(struct fwu_mdata *mdata)
++{
++	int i, j;
++	struct fwu_image_entry *img_entry;
++	struct fwu_image_bank_info *img_info;
++
++	printf("\tFWU Metadata\n");
++	printf("crc32: %#x\n", mdata->crc32);
++	printf("version: %#x\n", mdata->version);
++	printf("active_index: %#x\n", mdata->active_index);
++	printf("previous_active_index: %#x\n", mdata->previous_active_index);
++
++	printf("\tImage Info\n");
++	for (i = 0; i < CONFIG_FWU_NUM_IMAGES_PER_BANK; i++) {
++		img_entry = &mdata->img_entry[i];
++		printf("\nImage Type Guid: %pUL\n",
++		       &img_entry->image_type_uuid);
++		printf("Location Guid: %pUL\n", &img_entry->location_uuid);
++		for (j = 0; j < CONFIG_FWU_NUM_BANKS; j++) {
++			img_info = &img_entry->img_bank_info[j];
++			printf("Image Guid:  %pUL\n", &img_info->image_uuid);
++			printf("Image Acceptance: %s\n",
++			       img_info->accepted == 0x1 ? "yes" : "no");
++		}
++	}
++}
++
++int do_fwu_mdata_read(struct cmd_tbl *cmdtp, int flag,
++		     int argc, char * const argv[])
++{
++	struct udevice *dev;
++	int ret = CMD_RET_SUCCESS, res;
++	struct fwu_mdata mdata = { 0 };
++
++	if (uclass_get_device(UCLASS_FWU_MDATA, 0, &dev) || !dev) {
++		log_err("Unable to get FWU metadata device\n");
++		return CMD_RET_FAILURE;
++	}
++
++	res = fwu_mdata_check(dev);
++	if (res < 0) {
++		log_err("FWU Metadata check failed\n");
++		ret = CMD_RET_FAILURE;
++		goto out;
++	}
++
++	res = fwu_get_mdata(dev, &mdata);
++	if (res < 0) {
++		log_err("Unable to get valid FWU metadata\n");
++		ret = CMD_RET_FAILURE;
++		goto out;
++	}
++
++	print_mdata(&mdata);
++
++out:
++	return ret;
++}
++
++U_BOOT_CMD(
++	fwu_mdata_read,	1,	1,	do_fwu_mdata_read,
++	"Read and print FWU metadata",
++	""
++);
+diff --git a/doc/usage/cmd/fwu_mdata.rst b/doc/usage/cmd/fwu_mdata.rst
+new file mode 100644
+index 0000000000..ea3c22724a
+--- /dev/null
++++ b/doc/usage/cmd/fwu_mdata.rst
+@@ -0,0 +1,43 @@
++.. SPDX-License-Identifier: GPL-2.0+
++
++fwu_mdata_read command
++======================
++
++Synopsis
++--------
++
++::
++
++    fwu_mdata_read
++
++Description
++-----------
++
++The fwu_mdata_read command is used to read the FWU metadata
++structure. The command prints out information about the current active
++bank, the previous active bank, image GUIDs, image acceptance etc.
++
++The output may look like:
++
++::
++
++    => fwu_mdata_read
++            FWU Metadata
++    crc32: 0xec4fb997
++    version: 0x1
++    active_index: 0x0
++    previous_active_index: 0x1
++            Image Info
++
++    Image Type Guid: 19D5DF83-11B0-457B-BE2C-7559C13142A5
++    Location Guid: 49272BEB-8DD8-46DF-8D75-356C65EFF417
++    Image Guid:  D57428CC-BB9A-42E0-AA36-3F5A132059C7
++    Image Acceptance: yes
++    Image Guid:  2BE37D6D-8281-4938-BD7B-9A5BBF80869F
++    Image Acceptance: yes
++
++Configuration
++-------------
++
++To use the fwu_mdata_read command, CONFIG_CMD_FWU_METADATA needs to be
++enabled.
+diff --git a/doc/usage/index.rst b/doc/usage/index.rst
+index f1beeec59c..5b21451f6a 100644
+--- a/doc/usage/index.rst
++++ b/doc/usage/index.rst
+@@ -45,6 +45,7 @@ Shell commands
+    cmd/fatload
+    cmd/fdt
+    cmd/for
++   cmd/fwu_mdata
+    cmd/gpio
+    cmd/load
+    cmd/loadm
+-- 
+2.34.1
+

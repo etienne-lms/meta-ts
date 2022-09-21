@@ -1,0 +1,97 @@
+From: Sughosh Ganu <sughosh.ganu@linaro.org>
+Subject: [PATCH v12 07/15] FWU: STM32MP1: Add support to read boot index from backup register
+Date: Mon,  3 Oct 2022 19:54:19 +0530
+
+The FWU Multi Bank Update feature allows the platform to boot the
+firmware images from one of the partitions(banks). The first stage
+bootloader(fsbl) passes the value of the boot index, i.e. the bank
+from which the firmware images were booted from to U-Boot. On the
+STM32MP157C-DK2 board, this value is passed through one of the SoC's
+backup register. Add a function to read the boot index value from the
+backup register.
+
+Signed-off-by: Sughosh Ganu <sughosh.ganu@linaro.org>
+Reviewed-by: Patrick Delaunay <patrick.delaunay@foss.st.com>
+Acked-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+---
+Changes since V11: None
+
+ arch/arm/mach-stm32mp/include/mach/stm32.h |  5 +++++
+ board/st/stm32mp1/stm32mp1.c               | 21 +++++++++++++++++++++
+ include/fwu.h                              | 12 ++++++++++++
+ 3 files changed, 38 insertions(+)
+
+diff --git a/arch/arm/mach-stm32mp/include/mach/stm32.h b/arch/arm/mach-stm32mp/include/mach/stm32.h
+index c70375a723..c85ae6a34e 100644
+--- a/arch/arm/mach-stm32mp/include/mach/stm32.h
++++ b/arch/arm/mach-stm32mp/include/mach/stm32.h
+@@ -112,11 +112,16 @@ enum boot_device {
+ #ifdef CONFIG_STM32MP15x
+ #define TAMP_BACKUP_MAGIC_NUMBER	TAMP_BACKUP_REGISTER(4)
+ #define TAMP_BACKUP_BRANCH_ADDRESS	TAMP_BACKUP_REGISTER(5)
++#define TAMP_FWU_BOOT_INFO_REG		TAMP_BACKUP_REGISTER(10)
+ #define TAMP_COPRO_RSC_TBL_ADDRESS	TAMP_BACKUP_REGISTER(17)
+ #define TAMP_COPRO_STATE		TAMP_BACKUP_REGISTER(18)
+ #define TAMP_BOOT_CONTEXT		TAMP_BACKUP_REGISTER(20)
+ #define TAMP_BOOTCOUNT			TAMP_BACKUP_REGISTER(21)
+ 
++#define TAMP_FWU_BOOT_IDX_MASK		GENMASK(3, 0)
++
++#define TAMP_FWU_BOOT_IDX_OFFSET	0
++
+ #define TAMP_COPRO_STATE_OFF		0
+ #define TAMP_COPRO_STATE_INIT		1
+ #define TAMP_COPRO_STATE_CRUN		2
+diff --git a/board/st/stm32mp1/stm32mp1.c b/board/st/stm32mp1/stm32mp1.c
+index e43dab018f..43274c1ff6 100644
+--- a/board/st/stm32mp1/stm32mp1.c
++++ b/board/st/stm32mp1/stm32mp1.c
+@@ -957,3 +957,24 @@ static void board_copro_image_process(ulong fw_image, size_t fw_size)
+ }
+ 
+ U_BOOT_FIT_LOADABLE_HANDLER(IH_TYPE_COPRO, board_copro_image_process);
++
++#if defined(CONFIG_FWU_MULTI_BANK_UPDATE)
++
++#include <fwu.h>
++
++/**
++ * fwu_plat_get_bootidx() - Get the value of the boot index
++ * @boot_idx: Boot index value
++ *
++ * Get the value of the bank(partition) from which the platform
++ * has booted. This value is passed to U-Boot from the earlier
++ * stage bootloader which loads and boots all the relevant
++ * firmware images
++ *
++ */
++void fwu_plat_get_bootidx(uint *boot_idx)
++{
++	*boot_idx = (readl(TAMP_FWU_BOOT_INFO_REG) >>
++		    TAMP_FWU_BOOT_IDX_OFFSET) & TAMP_FWU_BOOT_IDX_MASK;
++}
++#endif /* CONFIG_FWU_MULTI_BANK_UPDATE */
+diff --git a/include/fwu.h b/include/fwu.h
+index 99f43f07b0..71a03cf70b 100644
+--- a/include/fwu.h
++++ b/include/fwu.h
+@@ -241,4 +241,16 @@ int fwu_plat_get_alt_num(struct udevice *dev, efi_guid_t *image_guid,
+  *
+  */
+ int fwu_plat_get_update_index(uint *update_idx);
++
++/**
++ * fwu_plat_get_bootidx() - Get the value of the boot index
++ * @boot_idx: Boot index value
++ *
++ * Get the value of the bank(partition) from which the platform
++ * has booted. This value is passed to U-Boot from the earlier
++ * stage bootloader which loads and boots all the relevant
++ * firmware images
++ *
++ */
++void fwu_plat_get_bootidx(uint *boot_idx);
+ #endif /* _FWU_H_ */
+-- 
+2.34.1
+

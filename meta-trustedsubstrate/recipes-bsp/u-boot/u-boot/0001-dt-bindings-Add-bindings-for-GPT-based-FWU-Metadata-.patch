@@ -1,0 +1,63 @@
+From: Sughosh Ganu <sughosh.ganu@linaro.org>
+Subject: [PATCH v12 01/15] dt/bindings: Add bindings for GPT based FWU Metadata storage device
+Date: Mon,  3 Oct 2022 19:54:13 +0530
+
+Add bindings needed for accessing the FWU metadata partitions. These
+include the compatible string which point to the access method and the
+actual device which stores the FWU metadata.
+
+The current patch adds basic bindings needed for accessing the
+metadata structure on GPT partitioned block devices.
+
+Signed-off-by: Sughosh Ganu <sughosh.ganu@linaro.org>
+Reviewed-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
+Acked-by: Etienne Carriere <etienne.carriere@linaro.org>
+Reviewed-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+---
+Changes since V11: None
+
+ .../firmware/fwu-mdata-gpt.yaml               | 32 +++++++++++++++++++
+ 1 file changed, 32 insertions(+)
+ create mode 100644 doc/device-tree-bindings/firmware/fwu-mdata-gpt.yaml
+
+diff --git a/doc/device-tree-bindings/firmware/fwu-mdata-gpt.yaml b/doc/device-tree-bindings/firmware/fwu-mdata-gpt.yaml
+new file mode 100644
+index 0000000000..0735191ff1
+--- /dev/null
++++ b/doc/device-tree-bindings/firmware/fwu-mdata-gpt.yaml
+@@ -0,0 +1,32 @@
++# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/firmware/fwu-mdata-gpt.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: FWU metadata on device with GPT partitioned layout
++
++maintainers:
++ - Sughosh Ganu <sughosh.ganu@linaro.org>
++
++properties:
++  compatible:
++    items:
++      - const: u-boot,fwu-mdata-gpt
++
++  fwu-mdata-store:
++    maxItems: 1
++    description: Phandle of the device which contains the FWU medatata partition.
++
++required:
++  - compatible
++  - fwu-mdata-store
++
++additionalProperties: false
++
++examples:
++  - |
++    fwu-mdata {
++        compatible = "u-boot,fwu-mdata-gpt";
++        fwu-mdata-store = <&sdmmc1>;
++    };
+-- 
+2.34.1
+

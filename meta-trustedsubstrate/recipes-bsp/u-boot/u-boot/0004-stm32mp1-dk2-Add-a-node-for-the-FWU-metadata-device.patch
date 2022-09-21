@@ -1,0 +1,37 @@
+From: Sughosh Ganu <sughosh.ganu@linaro.org>
+Subject: [PATCH v12 04/15] stm32mp1: dk2: Add a node for the FWU metadata device
+Date: Mon,  3 Oct 2022 19:54:16 +0530
+
+The FWU metadata structure is accessed through the driver model
+interface. On the stm32mp157c-dk2 board, the FWU metadata is stored on
+the uSD card. Add the fwu-mdata node on the u-boot specifc dtsi file
+for accessing the metadata structure.
+
+Signed-off-by: Sughosh Ganu <sughosh.ganu@linaro.org>
+Reviewed-by: Patrick Delaunay <patrick.delaunay@foss.st.com>
+Acked-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Acked-by: Etienne Carriere <etienne.carriere@linaro.org>
+---
+Changes since V11: None
+
+ arch/arm/dts/stm32mp157c-dk2-u-boot.dtsi | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/arch/arm/dts/stm32mp157c-dk2-u-boot.dtsi b/arch/arm/dts/stm32mp157c-dk2-u-boot.dtsi
+index 06ef3a4095..24f86209db 100644
+--- a/arch/arm/dts/stm32mp157c-dk2-u-boot.dtsi
++++ b/arch/arm/dts/stm32mp157c-dk2-u-boot.dtsi
+@@ -4,3 +4,10 @@
+  */
+ 
+ #include "stm32mp157a-dk1-u-boot.dtsi"
++
++/ {
++	fwu-mdata {
++		compatible = "u-boot,fwu-mdata-gpt";
++		fwu-mdata-store = <&sdmmc1>;
++	};
++};
+-- 
+2.34.1
+

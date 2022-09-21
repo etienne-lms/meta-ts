@@ -1,0 +1,81 @@
+From: Sughosh Ganu <sughosh.ganu@linaro.org>
+Subject: [PATCH v12 05/15] stm32mp1: Add image information for capsule updates
+Date: Mon,  3 Oct 2022 19:54:17 +0530
+
+Enabling capsule update functionality on the platform requires
+populating information on the images that are to be updated using the
+functionality. Do so for the DK2 board.
+
+Signed-off-by: Sughosh Ganu <sughosh.ganu@linaro.org>
+Reviewed-by: Patrick Delaunay <patrick.delaunay@foss.st.com>
+Reviewed-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Reviewed-by: Etienne Carriere <etienne.carriere@linaro.org>
+---
+Changes since V11:
+* Reword the commit subject line as suggested by Etienne
+
+ board/st/stm32mp1/stm32mp1.c       | 18 ++++++++++++++++++
+ include/configs/stm32mp15_common.h |  4 ++++
+ 2 files changed, 22 insertions(+)
+
+diff --git a/board/st/stm32mp1/stm32mp1.c b/board/st/stm32mp1/stm32mp1.c
+index 8c162b42a5..e43dab018f 100644
+--- a/board/st/stm32mp1/stm32mp1.c
++++ b/board/st/stm32mp1/stm32mp1.c
+@@ -11,6 +11,7 @@
+ #include <clk.h>
+ #include <config.h>
+ #include <dm.h>
++#include <efi_loader.h>
+ #include <env.h>
+ #include <env_internal.h>
+ #include <fdt_simplefb.h>
+@@ -87,6 +88,16 @@
+ #define USB_START_LOW_THRESHOLD_UV	1230000
+ #define USB_START_HIGH_THRESHOLD_UV	2150000
+ 
++#if CONFIG_IS_ENABLED(EFI_HAVE_CAPSULE_SUPPORT)
++struct efi_fw_image fw_images[1];
++
++struct efi_capsule_update_info update_info = {
++	.images = fw_images,
++};
++
++u8 num_image_type_guids = ARRAY_SIZE(fw_images);
++#endif /* EFI_HAVE_CAPSULE_SUPPORT */
++
+ int board_early_init_f(void)
+ {
+ 	/* nothing to do, only used in SPL */
+@@ -666,6 +677,13 @@ int board_init(void)
+ 
+ 	setup_led(LEDST_ON);
+ 
++#if CONFIG_IS_ENABLED(EFI_HAVE_CAPSULE_SUPPORT)
++	efi_guid_t image_type_guid = STM32MP_FIP_IMAGE_GUID;
++
++	guidcpy(&fw_images[0].image_type_id, &image_type_guid);
++	fw_images[0].fw_name = u"STM32MP-FIP";
++	fw_images[0].image_index = 1;
++#endif
+ 	return 0;
+ }
+ 
+diff --git a/include/configs/stm32mp15_common.h b/include/configs/stm32mp15_common.h
+index c5412ffeb3..bb19dae945 100644
+--- a/include/configs/stm32mp15_common.h
++++ b/include/configs/stm32mp15_common.h
+@@ -34,6 +34,10 @@
+ #define CONFIG_SERVERIP                 192.168.1.1
+ #endif
+ 
++#define STM32MP_FIP_IMAGE_GUID \
++	EFI_GUID(0x19d5df83, 0x11b0, 0x457b, 0xbe, 0x2c, \
++		 0x75, 0x59, 0xc1, 0x31, 0x42, 0xa5)
++
+ /*****************************************************************************/
+ #ifdef CONFIG_DISTRO_DEFAULTS
+ /*****************************************************************************/
+-- 
+2.34.1
+

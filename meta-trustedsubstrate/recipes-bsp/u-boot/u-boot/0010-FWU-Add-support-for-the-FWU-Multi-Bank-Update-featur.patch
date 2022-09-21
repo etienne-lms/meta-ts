@@ -1,0 +1,547 @@
+From: Sughosh Ganu <sughosh.ganu@linaro.org>
+Subject: [PATCH v12 10/15] FWU: Add support for the FWU Multi Bank Update feature
+Date: Mon,  3 Oct 2022 19:54:22 +0530
+
+The FWU Multi Bank Update feature supports updation of firmware images
+to one of multiple sets(also called banks) of images. The firmware
+images are clubbed together in banks, with the system booting images
+from the active bank. Information on the images such as which bank
+they belong to is stored as part of the metadata structure, which is
+stored on the same storage media as the firmware images on a dedicated
+partition.
+
+At the time of update, the metadata is read to identify the bank to
+which the images need to be flashed(update bank). On a successful
+update, the metadata is modified to set the updated bank as active
+bank to subsequently boot from.
+
+Signed-off-by: Sughosh Ganu <sughosh.ganu@linaro.org>
+---
+Changes since V11: None
+
+ drivers/Kconfig               |   2 +
+ drivers/Makefile              |   1 +
+ include/fwu.h                 |  30 +++++
+ lib/Kconfig                   |   6 +
+ lib/Makefile                  |   1 +
+ lib/efi_loader/efi_capsule.c  | 207 +++++++++++++++++++++++++++++++++-
+ lib/efi_loader/efi_firmware.c |  14 +++
+ lib/fwu_updates/Kconfig       |  33 ++++++
+ lib/fwu_updates/Makefile      |   7 ++
+ lib/fwu_updates/fwu.c         |  22 ++++
+ 10 files changed, 321 insertions(+), 2 deletions(-)
+ create mode 100644 lib/fwu_updates/Kconfig
+ create mode 100644 lib/fwu_updates/Makefile
+
+diff --git a/drivers/Kconfig b/drivers/Kconfig
+index 8b6fead351..75ac149d31 100644
+--- a/drivers/Kconfig
++++ b/drivers/Kconfig
+@@ -44,6 +44,8 @@ source "drivers/fuzz/Kconfig"
+ 
+ source "drivers/fpga/Kconfig"
+ 
++source "drivers/fwu-mdata/Kconfig"
++
+ source "drivers/gpio/Kconfig"
+ 
+ source "drivers/hwspinlock/Kconfig"
+diff --git a/drivers/Makefile b/drivers/Makefile
+index eba9940231..af7ed7bdf3 100644
+--- a/drivers/Makefile
++++ b/drivers/Makefile
+@@ -84,6 +84,7 @@ obj-y += cache/
+ obj-$(CONFIG_CPU) += cpu/
+ obj-y += crypto/
+ obj-$(CONFIG_FASTBOOT) += fastboot/
++obj-$(CONFIG_FWU_MDATA) += fwu-mdata/
+ obj-y += misc/
+ obj-$(CONFIG_MMC) += mmc/
+ obj-$(CONFIG_NVME) += nvme/
+diff --git a/include/fwu.h b/include/fwu.h
+index 2effa7da38..b5c59dc161 100644
+--- a/include/fwu.h
++++ b/include/fwu.h
+@@ -60,6 +60,7 @@ struct fwu_mdata_ops {
+ };
+ 
+ #define FWU_MDATA_VERSION	0x1
++#define FWU_IMAGE_ACCEPTED	0x1
+ 
+ /*
+ * GUID value defined in the FWU specification for identification
+@@ -69,6 +70,24 @@ struct fwu_mdata_ops {
+ 	EFI_GUID(0x8a7a84a0, 0x8387, 0x40f6, 0xab, 0x41, \
+ 		 0xa8, 0xb9, 0xa5, 0xa6, 0x0d, 0x23)
+ 
++/*
++* GUID value defined in the Dependable Boot specification for
++* identification of the revert capsule, used for reverting
++* any image in the updated bank.
++*/
++#define FWU_OS_REQUEST_FW_REVERT_GUID \
++	EFI_GUID(0xacd58b4b, 0xc0e8, 0x475f, 0x99, 0xb5, \
++		 0x6b, 0x3f, 0x7e, 0x07, 0xaa, 0xf0)
++
++/*
++* GUID value defined in the Dependable Boot specification for
++* identification of the accept capsule, used for accepting
++* an image in the updated bank.
++*/
++#define FWU_OS_REQUEST_FW_ACCEPT_GUID \
++	EFI_GUID(0x0c996046, 0xbcc0, 0x4d04, 0x85, 0xec, \
++		 0xe1, 0xfc, 0xed, 0xf1, 0xc6, 0xf8)
++
+ /**
+  * fwu_get_mdata() - Get a FWU metadata copy
+  * @dev: FWU metadata device
+@@ -266,4 +285,15 @@ void fwu_plat_get_bootidx(uint *boot_idx);
+  */
+ u8 fwu_update_checks_pass(void);
+ 
++/**
++ * fwu_trial_state_ctr_start() - Start the Trial State counter
++ *
++ * Start the counter to identify the platform booting in the
++ * Trial State. The counter is implemented as an EFI variable.
++ *
++ * Return: 0 if OK, -ve on error
++ *
++ */
++int fwu_trial_state_ctr_start(void);
++
+ #endif /* _FWU_H_ */
+diff --git a/lib/Kconfig b/lib/Kconfig
+index 6121c80dc8..6abe1d0a86 100644
+--- a/lib/Kconfig
++++ b/lib/Kconfig
+@@ -978,3 +978,9 @@ config LMB_RESERVED_REGIONS
+ 	  memory blocks.
+ 
+ endmenu
++
++menu "FWU Multi Bank Updates"
++
++source lib/fwu_updates/Kconfig
++
++endmenu
+diff --git a/lib/Makefile b/lib/Makefile
+index e3deb15287..f2cfd1e428 100644
+--- a/lib/Makefile
++++ b/lib/Makefile
+@@ -9,6 +9,7 @@ obj-$(CONFIG_EFI) += efi/
+ obj-$(CONFIG_EFI_LOADER) += efi_driver/
+ obj-$(CONFIG_EFI_LOADER) += efi_loader/
+ obj-$(CONFIG_CMD_BOOTEFI_SELFTEST) += efi_selftest/
++obj-$(CONFIG_FWU_MULTI_BANK_UPDATE) += fwu_updates/
+ obj-$(CONFIG_LZMA) += lzma/
+ obj-$(CONFIG_BZIP2) += bzip2/
+ obj-$(CONFIG_FIT) += libfdt/
+diff --git a/lib/efi_loader/efi_capsule.c b/lib/efi_loader/efi_capsule.c
+index a6b98f066a..23baf1c6b6 100644
+--- a/lib/efi_loader/efi_capsule.c
++++ b/lib/efi_loader/efi_capsule.c
+@@ -14,6 +14,7 @@
+ #include <env.h>
+ #include <fdtdec.h>
+ #include <fs.h>
++#include <fwu.h>
+ #include <hang.h>
+ #include <malloc.h>
+ #include <mapmem.h>
+@@ -32,6 +33,12 @@ static const efi_guid_t efi_guid_firmware_management_capsule_id =
+ 		EFI_FIRMWARE_MANAGEMENT_CAPSULE_ID_GUID;
+ const efi_guid_t efi_guid_firmware_management_protocol =
+ 		EFI_FIRMWARE_MANAGEMENT_PROTOCOL_GUID;
++const efi_guid_t fwu_guid_os_request_fw_revert =
++		FWU_OS_REQUEST_FW_REVERT_GUID;
++const efi_guid_t fwu_guid_os_request_fw_accept =
++		FWU_OS_REQUEST_FW_ACCEPT_GUID;
++
++#define FW_ACCEPT_OS	(u32)0x8000
+ 
+ #ifdef CONFIG_EFI_CAPSULE_ON_DISK
+ /* for file system access */
+@@ -388,6 +395,130 @@ efi_status_t efi_capsule_authenticate(const void *capsule, efi_uintn_t capsule_s
+ }
+ #endif /* CONFIG_EFI_CAPSULE_AUTHENTICATE */
+ 
++static __maybe_unused bool fwu_empty_capsule(struct efi_capsule_header *capsule)
++{
++	return !guidcmp(&capsule->capsule_guid,
++			&fwu_guid_os_request_fw_revert) ||
++		!guidcmp(&capsule->capsule_guid,
++			 &fwu_guid_os_request_fw_accept);
++}
++
++static __maybe_unused efi_status_t fwu_to_efi_error(int err)
++{
++	efi_status_t ret;
++
++	switch(err) {
++	case 0:
++		ret = EFI_SUCCESS;
++		break;
++	case -ENODEV:
++	case -ERANGE:
++	case -EIO:
++		ret = EFI_DEVICE_ERROR;
++		break;
++	case -EINVAL:
++		ret = EFI_INVALID_PARAMETER;
++		break;
++	default:
++		ret = EFI_OUT_OF_RESOURCES;
++	}
++
++	return ret;
++}
++
++static __maybe_unused efi_status_t fwu_empty_capsule_process(
++	struct efi_capsule_header *capsule)
++{
++	int status;
++	u32 active_idx;
++	efi_status_t ret;
++	efi_guid_t *image_guid;
++
++	if (!guidcmp(&capsule->capsule_guid,
++		     &fwu_guid_os_request_fw_revert)) {
++		/*
++		 * One of the previously updated image has
++		 * failed the OS acceptance test. OS has
++		 * requested to revert back to the earlier
++		 * boot index
++		 */
++		status = fwu_revert_boot_index();
++		ret = fwu_to_efi_error(status);
++		if (ret == EFI_SUCCESS)
++			log_info("Reverted the FWU active_index. Recommend rebooting the system\n");
++		else
++			log_err("Failed to revert the FWU boot index\n");
++	} else {
++		/*
++		 * Image accepted by the OS. Set the acceptance
++		 * status for the image.
++		 */
++		image_guid = (void *)(char *)capsule +
++			capsule->header_size;
++
++		status = fwu_get_active_index(&active_idx);
++		ret = fwu_to_efi_error(status);
++		if (ret != EFI_SUCCESS) {
++			log_err("Unable to get the active_index from the FWU metadata\n");
++			return ret;
++		}
++
++		status = fwu_accept_image(image_guid, active_idx);
++		ret = fwu_to_efi_error(status);
++		if (ret != EFI_SUCCESS)
++			log_err("Unable to set the Accept bit for the image %pUs\n",
++				image_guid);
++	}
++
++	return ret;
++}
++
++static __maybe_unused void fwu_post_update_checks(
++	struct efi_capsule_header *capsule,
++	bool *fw_accept_os, bool *capsule_update)
++{
++	if (fwu_empty_capsule(capsule))
++		*capsule_update = false;
++	else
++		if (!*fw_accept_os)
++			*fw_accept_os =
++				capsule->flags & FW_ACCEPT_OS ? true : false;
++}
++
++static __maybe_unused efi_status_t fwu_post_update_process(bool fw_accept_os)
++{
++	int status;
++	u32 update_index;
++	efi_status_t ret;
++
++	status = fwu_plat_get_update_index(&update_index);
++	if (status < 0) {
++		log_err("Failed to get the FWU update_index value\n");
++		return EFI_DEVICE_ERROR;
++	}
++
++	/*
++	 * All the capsules have been updated successfully,
++	 * update the FWU metadata.
++	 */
++	log_debug("Update Complete. Now updating active_index to %u\n",
++		  update_index);
++	status = fwu_set_active_index(update_index);
++	ret = fwu_to_efi_error(status);
++	if (ret != EFI_SUCCESS) {
++		log_err("Failed to update FWU metadata index values\n");
++	} else {
++		log_debug("Successfully updated the active_index\n");
++		ret = EFI_SUCCESS;
++		if (fw_accept_os) {
++			status = fwu_trial_state_ctr_start();
++			if (status < 0)
++				ret = EFI_DEVICE_ERROR;
++		}
++	}
++
++	return ret;
++}
+ 
+ /**
+  * efi_capsule_update_firmware - update firmware from capsule
+@@ -410,7 +541,31 @@ static efi_status_t efi_capsule_update_firmware(
+ 	int item;
+ 	struct efi_firmware_management_protocol *fmp;
+ 	u16 *abort_reason;
++	efi_guid_t *image_type_id;
+ 	efi_status_t ret = EFI_SUCCESS;
++	int status;
++	u32 update_index;
++	bool fw_accept_os;
++
++	if (IS_ENABLED(CONFIG_FWU_MULTI_BANK_UPDATE)) {
++		if (fwu_empty_capsule(capsule_data))
++			return fwu_empty_capsule_process(capsule_data);
++
++		if (!fwu_update_checks_pass()) {
++			log_err("FWU checks failed. Cannot start update\n");
++			return EFI_INVALID_PARAMETER;
++		}
++
++
++		/* Obtain the update_index from the platform */
++		status = fwu_plat_get_update_index(&update_index);
++		if (status < 0) {
++			log_err("Failed to get the FWU update_index value\n");
++			return EFI_DEVICE_ERROR;
++		}
++
++		fw_accept_os = capsule_data->flags & FW_ACCEPT_OS ? 0x1 : 0x0;
++	}
+ 
+ 	/* sanity check */
+ 	if (capsule_data->header_size < sizeof(*capsule) ||
+@@ -497,6 +652,34 @@ static efi_status_t efi_capsule_update_firmware(
+ 			efi_free_pool(abort_reason);
+ 			goto out;
+ 		}
++
++		if (IS_ENABLED(CONFIG_FWU_MULTI_BANK_UPDATE)) {
++			image_type_id = &image->update_image_type_id;
++			if (!fw_accept_os) {
++				/*
++				 * The OS will not be accepting the firmware
++				 * images. Set the accept bit of all the
++				 * images contained in this capsule.
++				 */
++				status = fwu_accept_image(image_type_id,
++							  update_index);
++			} else {
++				status = fwu_clear_accept_image(image_type_id,
++								update_index);
++			}
++			ret = fwu_to_efi_error(status);
++			if (ret != EFI_SUCCESS) {
++				log_err("Unable to %s the accept bit for the image %pUs\n",
++					fw_accept_os ? "clear" : "set",
++					image_type_id);
++				goto out;
++			}
++
++			log_debug("%s the accepted bit for Image %pUs\n",
++				  fw_accept_os ? "Cleared" : "Set",
++				  image_type_id);
++		}
++
+ 	}
+ 
+ out:
+@@ -1104,6 +1287,9 @@ efi_status_t efi_launch_capsules(void)
+ 	u16 **files;
+ 	unsigned int nfiles, index, i;
+ 	efi_status_t ret;
++	bool capsule_update = true;
++	bool update_status = true;
++	bool fw_accept_os = false;
+ 
+ 	if (check_run_capsules() != EFI_SUCCESS)
+ 		return EFI_SUCCESS;
+@@ -1131,12 +1317,19 @@ efi_status_t efi_launch_capsules(void)
+ 		ret = efi_capsule_read_file(files[i], &capsule);
+ 		if (ret == EFI_SUCCESS) {
+ 			ret = efi_capsule_update_firmware(capsule);
+-			if (ret != EFI_SUCCESS)
++			if (ret != EFI_SUCCESS) {
+ 				log_err("Applying capsule %ls failed.\n",
+ 					files[i]);
+-			else
++				update_status = false;
++			} else {
+ 				log_info("Applying capsule %ls succeeded.\n",
+ 					 files[i]);
++				if (IS_ENABLED(CONFIG_FWU_MULTI_BANK_UPDATE)) {
++					fwu_post_update_checks(capsule,
++							       &fw_accept_os,
++							       &capsule_update);
++				}
++			}
+ 
+ 			/* create CapsuleXXXX */
+ 			set_capsule_result(index, capsule, ret);
+@@ -1144,6 +1337,7 @@ efi_status_t efi_launch_capsules(void)
+ 			free(capsule);
+ 		} else {
+ 			log_err("Reading capsule %ls failed\n", files[i]);
++			update_status = false;
+ 		}
+ 		/* delete a capsule either in case of success or failure */
+ 		ret = efi_capsule_delete_file(files[i]);
+@@ -1151,8 +1345,17 @@ efi_status_t efi_launch_capsules(void)
+ 			log_err("Deleting capsule %ls failed\n",
+ 				files[i]);
+ 	}
++
+ 	efi_capsule_scan_done();
+ 
++	if (IS_ENABLED(CONFIG_FWU_MULTI_BANK_UPDATE)) {
++		if (capsule_update == true && update_status == true) {
++			ret = fwu_post_update_process(fw_accept_os);
++		} else if (capsule_update == true && update_status == false) {
++			log_err("All capsules were not updated. Not updating FWU metadata\n");
++		}
++	}
++
+ 	for (i = 0; i < nfiles; i++)
+ 		free(files[i]);
+ 	free(files);
+diff --git a/lib/efi_loader/efi_firmware.c b/lib/efi_loader/efi_firmware.c
+index 30cafd15ca..93e2b01c07 100644
+--- a/lib/efi_loader/efi_firmware.c
++++ b/lib/efi_loader/efi_firmware.c
+@@ -10,6 +10,7 @@
+ #include <charset.h>
+ #include <dfu.h>
+ #include <efi_loader.h>
++#include <fwu.h>
+ #include <image.h>
+ #include <signatures.h>
+ 
+@@ -389,6 +390,7 @@ efi_status_t EFIAPI efi_firmware_raw_set_image(
+ 	efi_status_t (*progress)(efi_uintn_t completion),
+ 	u16 **abort_reason)
+ {
++	int ret;
+ 	efi_status_t status;
+ 
+ 	EFI_ENTRY("%p %d %p %zu %p %p %p\n", this, image_index, image,
+@@ -401,6 +403,18 @@ efi_status_t EFIAPI efi_firmware_raw_set_image(
+ 	if (status != EFI_SUCCESS)
+ 		return EFI_EXIT(status);
+ 
++	if (IS_ENABLED(CONFIG_FWU_MULTI_BANK_UPDATE)) {
++		/*
++		 * Based on the value of update bank, derive the
++		 * image index value.
++		 */
++		ret = fwu_get_image_index(&image_index);
++		if (ret) {
++			log_debug("Unable to get FWU image_index\n");
++			return EFI_EXIT(EFI_DEVICE_ERROR);
++		}
++	}
++
+ 	if (dfu_write_by_alt(image_index - 1, (void *)image, image_size,
+ 			     NULL, NULL))
+ 		return EFI_EXIT(EFI_DEVICE_ERROR);
+diff --git a/lib/fwu_updates/Kconfig b/lib/fwu_updates/Kconfig
+new file mode 100644
+index 0000000000..78759e6618
+--- /dev/null
++++ b/lib/fwu_updates/Kconfig
+@@ -0,0 +1,33 @@
++config FWU_MULTI_BANK_UPDATE
++	bool "Enable FWU Multi Bank Update Feature"
++	depends on EFI_CAPSULE_ON_DISK
++	select PARTITION_TYPE_GUID
++	select EFI_SETUP_EARLY
++	imply EFI_CAPSULE_ON_DISK_EARLY
++	select EVENT
++	help
++	  Feature for updating firmware images on platforms having
++	  multiple banks(copies) of the firmware images. One of the
++	  bank is selected for updating all the firmware components
++
++config FWU_NUM_BANKS
++	int "Number of Banks defined by the platform"
++	depends on FWU_MULTI_BANK_UPDATE
++	help
++	  Define the number of banks of firmware images on a platform
++
++config FWU_NUM_IMAGES_PER_BANK
++	int "Number of firmware images per bank"
++	depends on FWU_MULTI_BANK_UPDATE
++	help
++	  Define the number of firmware images per bank. This value
++	  should be the same for all the banks.
++
++config FWU_TRIAL_STATE_CNT
++	int "Number of times system boots in Trial State"
++	depends on FWU_MULTI_BANK_UPDATE
++	default 3
++	help
++	  With FWU Multi Bank Update feature enabled, number of times
++	  the platform is allowed to boot in Trial State after an
++	  update.
+diff --git a/lib/fwu_updates/Makefile b/lib/fwu_updates/Makefile
+new file mode 100644
+index 0000000000..1993088e5b
+--- /dev/null
++++ b/lib/fwu_updates/Makefile
+@@ -0,0 +1,7 @@
++# SPDX-License-Identifier: GPL-2.0-or-later
++#
++# Copyright (c) 2022, Linaro Limited
++#
++
++obj-$(CONFIG_FWU_MULTI_BANK_UPDATE) += fwu.o
++obj-$(CONFIG_FWU_MDATA_GPT_BLK) += fwu_gpt.o
+diff --git a/lib/fwu_updates/fwu.c b/lib/fwu_updates/fwu.c
+index b14c0dfadd..ea8d4144b2 100644
+--- a/lib/fwu_updates/fwu.c
++++ b/lib/fwu_updates/fwu.c
+@@ -523,6 +523,28 @@ u8 fwu_update_checks_pass(void)
+ 	return !trial_state && boottime_check;
+ }
+ 
++/**
++ * fwu_trial_state_ctr_start() - Start the Trial State counter
++ *
++ * Start the counter to identify the platform booting in the
++ * Trial State. The counter is implemented as an EFI variable.
++ *
++ * Return: 0 if OK, -ve on error
++ *
++ */
++int fwu_trial_state_ctr_start(void)
++{
++	int ret;
++	u16 trial_state_ctr;
++
++	trial_state_ctr = 0;
++	ret = trial_counter_update(&trial_state_ctr);
++	if (ret)
++		log_err("Unable to initialise TrialStateCtr\n");
++
++	return ret;
++}
++
+ static int fwu_boottime_checks(void *ctx, struct event *event)
+ {
+ 	int ret;
+-- 
+2.34.1
+
