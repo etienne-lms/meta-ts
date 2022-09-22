@@ -2,8 +2,7 @@ DEPENDS += "python3-pycryptodomex-native python3-cryptography-native edk2-firmwa
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files/optee-os/rockpi4b:"
 
-SRC_URI:append = " \
-                  file://0001-plat-rockchip-register-nsec-ddr.patch"
+SRC_URI += "file://0001-plat-rockchip-register-nsec-ddr.patch"
 
 COMPATIBLE_MACHINE = "rockpi4b"
 

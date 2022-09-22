@@ -2,7 +2,7 @@ inherit deploy
 NO_DTB_UBOOT="u-boot-nodtb.bin"
 
 COMPATIBLE_MACHINE = "stm32mp157c-ev1"
-SRC_URI:append = " file://stm32mp157c_ev1_trusted_defconfig"
+SRC_URI += "file://stm32mp157c_ev1_trusted_defconfig"
 
 do_deploy () {
 	mkdir -p ${DEPLOYDIR}

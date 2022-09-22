@@ -8,11 +8,11 @@ LIC_FILES_CHKSUM="file://docs/license.rst;md5=713afe122abbe07f067f939ca3c480c5 f
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files/synquacer:"
 
-SRC_URI:append = " \
-		  file://0001-fiptool-Accept-fixed-offset-for-image.patch \
-		  file://0002-fix-plat-synquacer-update-scmi-power-domain-off-hand.patch \
-		  file://dummy.bin \
-		 "
+SRC_URI += "\
+	  file://0001-fiptool-Accept-fixed-offset-for-image.patch \
+	  file://0002-fix-plat-synquacer-update-scmi-power-domain-off-hand.patch \
+	  file://dummy.bin \
+"
 
 TFA_DEBUG = "1"
 TFA_UBOOT = "1"
@@ -31,9 +31,9 @@ TFA_SPMD_SPM_AT_SEL2 = "0"
 # BL2 loads BL32 (optee). So, optee needs to be built first:
 DEPENDS += " optee-os virtual/bootloader scp-firmware"
 
-EXTRA_OEMAKE:append = ' PRELOADED_BL33_BASE=0x08200000 SQ_USE_SCMI_DRIVER=1' 
+EXTRA_OEMAKE += 'PRELOADED_BL33_BASE=0x08200000 SQ_USE_SCMI_DRIVER=1'
 
-EXTRA_OEMAKE:append = " \
+EXTRA_OEMAKE += "\
                         ARCH=aarch64 \
                         TARGET_PLATFORM=${TFA_TARGET_PLATFORM} \
                         TRUSTED_BOARD_BOOT=1 \

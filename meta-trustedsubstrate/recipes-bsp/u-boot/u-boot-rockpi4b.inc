@@ -13,6 +13,7 @@ SRC_URI += "file://0006-spl-fit-add-config-option-for-temporary-buffer-when-.pat
 SRC_URI += "file://0007-rockchip-rk3399-enable-spl-fifo-mode-for-sdmmc-only-.patch"
 SRC_URI += "file://0008-rockchip-make_fit_atf-generate-signed-conf-when-FIT_.patch"
 SRC_URI += "file://0009-u-boot-rk3399-capsule-update-support.patch"
+SRC_URI += "file://rockpi4b/images.json"
 
 COMPATIBLE_MACHINE = "rockpi4b"
 
@@ -53,7 +54,6 @@ do_compile:append() {
 	}; fi
 }
 
-SRC_URI:append = " file://rockpi4b/images.json"
 require u-boot-capsule.inc
 
 do_deploy:append() {

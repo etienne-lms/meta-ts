@@ -26,9 +26,9 @@ TFA_SPMD_SPM_AT_SEL2 = "0"
 DEPENDS += " optee-os gcc-arm-none-eabi-native"
 DEPENDS:remove = "uboot"
 
-# EXTRA_OEMAKE:append = ' PRELOADED_BL33_BASE=0x08200000 SQ_USE_SCMI_DRIVER=1'
+# EXTRA_OEMAKE += 'PRELOADED_BL33_BASE=0x08200000 SQ_USE_SCMI_DRIVER=1'
 
-EXTRA_OEMAKE:append = " \
+EXTRA_OEMAKE += "\
                         ARCH=aarch64 \
                         TARGET_PLATFORM=${TFA_TARGET_PLATFORM} \
                         TRUSTED_BOARD_BOOT=1 \

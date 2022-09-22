@@ -1,14 +1,14 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 # Always increment PR on u-boot config change or patches
-PR="r1.ts"
+PR = "r1.ts"
 
 # Overwrite poky side SRC_URI to remove all security etc patches
 # since we update to a newer version anyway and the patches don't apply
 SRC_URI = "git://git.denx.de/u-boot.git;branch=master"
 
-#v2022.10-rc4"
-SRCREV="51601397fcbb13e6dc2e4223408230c82955a601"
+PV = "2022.10-rc4"
+SRCREV = "51601397fcbb13e6dc2e4223408230c82955a601"
 LIC_FILES_CHKSUM = "file://Licenses/README;md5=2ca5f2c35c8cc335f0a19756634782f1"
 
 do_configure:prepend() {

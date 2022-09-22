@@ -6,11 +6,12 @@ inherit deploy
 DEPENDS += " dtc-native"
 
 SRCREV="1.20210831"
-SRC_URI = "https://github.com/raspberrypi/firmware/archive/refs/tags/${SRCREV}.tar.gz"
+SRC_URI = "\
+    https://github.com/raspberrypi/firmware/archive/refs/tags/${SRCREV}.tar.gz \
+    file://config.txt \
+    file://tpm-soft-spi.dts \
+"
 SRC_URI[sha256sum] = "47f879cd2b58cf556a9da95820af982d93929dfa4ff22488fc0bb271025c02ef"
-
-SRC_URI:append = " file://config.txt"
-SRC_URI:append = " file://tpm-soft-spi.dts"
 
 S = "${WORKDIR}/firmware-${SRCREV}/boot"
 
