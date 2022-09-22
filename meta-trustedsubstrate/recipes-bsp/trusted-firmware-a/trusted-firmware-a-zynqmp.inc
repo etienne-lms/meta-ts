@@ -19,7 +19,7 @@ TFA_TARGET_PLATFORM = "zynqmp"
 # Enabling Secure-EL1 Payload Dispatcher (SPD)
 #TFA_SPD:zynqmp-production = "opteed"
 
-EXTRA_OEMAKE:append = " ZYNQMP_CONSOLE=cadence1 RESET_TO_BL31=1 PLAT=zynqmp \
+EXTRA_OEMAKE += "ZYNQMP_CONSOLE=cadence1 RESET_TO_BL31=1 PLAT=zynqmp \
                         bl31 ZYNQMP_ATF_MEM_BASE=0xFFFE9000 \
 						ZYNQMP_ATF_MEM_SIZE=0x17000"
 

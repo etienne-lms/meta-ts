@@ -25,7 +25,7 @@ DEPENDS += " dtc-native"
 inherit deploy
 # https://wiki.st.com/stm32mpu/wiki/How_to_configure_TF-A_FIP
 
-EXTRA_OEMAKE:append = " \
+EXTRA_OEMAKE += "\
                         ARCH=aarch32 ARM_ARCH_MAJOR=7 \
                         PLAT=${TFA_TARGET_PLATFORM} \
                         DTB_FILE_NAME=${TFA_DEVICETREE} \
