@@ -2,8 +2,8 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/u-boot/capsule:"
 
 DEPENDS += "ovmf-native"
 
-# SRC_URI:append = " file://uefi-certificates/db.key"
-# SRC_URI:append = " file://uefi-certificates/db.crt"
+# SRC_URI += "file://uefi-certificates/db.key"
+# SRC_URI += "file://uefi-certificates/db.crt"
 
 do_compile:append() {
 	export PYTHONPATH="${STAGING_DIR_NATIVE}/usr/bin/edk2_basetools/BaseTools/Source/Python"
