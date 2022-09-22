@@ -2,8 +2,7 @@ DEPENDS += "python3-pycryptodomex-native edk2-firmware"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files/optee-os/synquacer:"
 
-SRC_URI:append = " \
-		  file://0001-plat-synquacer-add-whole-DRAM-region-for-u-boot-supp.patch"
+SRC_URI += "file://0001-plat-synquacer-add-whole-DRAM-region-for-u-boot-supp.patch"
 
 COMPATIBLE_MACHINE = "synquacer"
 
