@@ -4,6 +4,9 @@
 bootloader --ptable gpt
 part fsbl1 --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=fsbl1 --sourceparams="file=${DEPLOY_DIR_IMAGE}/tf-a-stm32mp157c-dk2.stm32" --ondisk mmcblk --part-type 0x8301 --fixed-size 256K
 part fsbl2 --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=fsbl2 --sourceparams="file=${DEPLOY_DIR_IMAGE}/tf-a-stm32mp157c-dk2.stm32" --ondisk mmcblk --part-type 0x8301 --fixed-size 256K
-part ssbl  --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=fip --sourceparams="file=${DEPLOY_DIR_IMAGE}/fip.bin" --ondisk mmcblk --part-type 0x8301 --fixed-size 2048K
-part ubootenv --part-name=u-boot-env --ondisk mmcblk --part-type 0x8301 --fixed-size 1M
+part ssbl  --source rawcopy --part-name=fip --sourceparams="file=${DEPLOY_DIR_IMAGE}/fip.bin" --ondisk mmcblk --part-type 0x8301 --fixed-size 2048K --uuid 4fd84c93-54ef-463f-a7ef-ae25ff887087
+part ssbl2 --source rawcopy --part-name=fip_b --sourceparams="file=${DEPLOY_DIR_IMAGE}/fip.bin" --ondisk mmcblk --part-type 0x8301 --fixed-size 2048K --uuid 09c54952-d5bf-45af-acee-335303766fb3
+part mdata1 --source rawcopy --part-name=metadata1 --sourceparams="file=${DEPLOY_DIR_IMAGE}/fwu_mdata.bin" --ondisk mmcblk --part-type 8a7a84a0-8387-40f6-ab41-a8b9a5a60d23 --fixed-size 4K
+part mdata2 --source rawcopy --part-name=metadata2 --sourceparams="file=${DEPLOY_DIR_IMAGE}/fwu_mdata.bin" --ondisk mmcblk --part-type 8a7a84a0-8387-40f6-ab41-a8b9a5a60d23 --fixed-size 4K
+part ubootenv --fstype=vfat --part-name=u-boot-env --ondisk mmcblk --part-type 0x0700 --fixed-size 32M
 part esp   --fstype=vfat --part-name=ESP --ondisk mmcblk --part-type 0xef00 --fixed-size 32M
