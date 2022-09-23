@@ -2,6 +2,8 @@
 
 COMPATIBLE_MACHINE = "stm32mp157c-dk2"
 
+# Force using TFA v2.7 (needed for PSA_FWU_SUPPORT)
+SRCREV_tfa = "35f4c7295bafeb32c8bcbdfb6a3f2e74a57e732b"
 PV .= "+git${SRCREV_tfa}"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files/stm32mp1:"
