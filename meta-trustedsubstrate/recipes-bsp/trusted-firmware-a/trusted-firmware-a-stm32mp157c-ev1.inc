@@ -5,6 +5,8 @@ PV .= "+git${SRCREV_tfa}"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files/stm32mp1:"
 
+SRC_URI:append = " file://fwu_mdata_default.bin "
+
 TFA_DEBUG = "0"
 TFA_UBOOT = "0"
 TFA_MBEDTLS = "0"
@@ -37,6 +39,12 @@ EXTRA_OEMAKE += "\
                         BL32_EXTRA2=${RECIPE_SYSROOT}/lib/firmware/tee-pageable_v2.bin \
                         LOG_LEVEL=1 \
 			"
+
+do_deploy:append() {
+	echo "Embed FWU metadata partitions default image"
+	cd ${DEPLOYDIR}
+	cp ${WORKDIR}/fwu_mdata_default.bin ${DEPLOYDIR}/fwu_mdata.bin
+}
 
 do_install:append() {
 	mkdir -p ${D}/firmware
