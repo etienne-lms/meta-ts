@@ -5,3 +5,4 @@ Build and install
 
     build_source
     install_firmware
+    update_firmware
