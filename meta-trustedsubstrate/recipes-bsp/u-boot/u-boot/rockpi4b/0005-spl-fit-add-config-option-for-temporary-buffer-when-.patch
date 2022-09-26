@@ -1,7 +1,7 @@
-From 20d9da4feda49891718e63f4a295753de69bd660 Mon Sep 17 00:00:00 2001
+From f9bd831f11d57ac51c6dcbdb02fb1e8216019671 Mon Sep 17 00:00:00 2001
 From: Jerome Forissier <jerome.forissier@linaro.org>
 Date: Fri, 3 Jun 2022 09:25:48 +0100
-Subject: [PATCH 6/9] spl: fit: add config option for temporary buffer when
+Subject: [PATCH 5/9] spl: fit: add config option for temporary buffer when
  loading image
 
 When the load address of a FIT image isn't properly aligned,

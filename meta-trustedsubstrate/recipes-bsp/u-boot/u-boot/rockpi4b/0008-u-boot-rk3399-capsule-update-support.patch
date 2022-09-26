@@ -1,7 +1,7 @@
-From 4e4b5b1612ddf341b4a145cf717750e3a5789404 Mon Sep 17 00:00:00 2001
+From fd326f005d0e7603b94cc74aed87b53498efcf51 Mon Sep 17 00:00:00 2001
 From: Sughosh Ganu <sughosh.ganu@linaro.org>
 Date: Wed, 7 Sep 2022 12:15:19 +0000
-Subject: [PATCH 9/9] u-boot: rk3399: capsule update support
+Subject: [PATCH 8/9] u-boot: rk3399: capsule update support
 
 Add support for updating the idbloader and u-boot images through the
 UEFI capsule update functionality. Enable the modules required for

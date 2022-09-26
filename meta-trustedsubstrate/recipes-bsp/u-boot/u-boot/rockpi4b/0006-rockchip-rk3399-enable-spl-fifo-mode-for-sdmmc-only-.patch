@@ -1,7 +1,7 @@
-From 0273bbaa26ad6d2949bbac852db42cfbb3336899 Mon Sep 17 00:00:00 2001
+From a7f1406298af5dc04767e699b748fad9e840e104 Mon Sep 17 00:00:00 2001
 From: Jerome Forissier <jerome.forissier@linaro.org>
 Date: Thu, 9 Jun 2022 11:07:11 +0200
-Subject: [PATCH 7/9] rockchip: rk3399: enable spl-fifo-mode for sdmmc only
+Subject: [PATCH 6/9] rockchip: rk3399: enable spl-fifo-mode for sdmmc only
  when needed
 
 Commit 5c606ca35c42 ("rockchip: rk3399: enable spl-fifo-mode for sdmmc")
@@ -20,14 +20,6 @@ Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
 ---
  arch/arm/dts/rk3399-u-boot.dtsi | 2 ++
  1 file changed, 2 insertions(+)
-
-Note: this patch also works around a bug in the MMC FIFO mode which
-would cause read errors and prevent the board from booting most of the
-time. It is not needed anymore once the fix [1] is merged upstream
-(although DMA mode does improve the boot speed marginally -- the FIT
-verification is ~0.5 s faster, 5.5 s. vs 6 s).
-
-[1] https://patchwork.ozlabs.org/project/uboot/patch/20220915175656.3447093-1-john@metanate.com/#2965950
 
 diff --git a/arch/arm/dts/rk3399-u-boot.dtsi b/arch/arm/dts/rk3399-u-boot.dtsi
 index 3c1a15fe51..26857b2491 100644

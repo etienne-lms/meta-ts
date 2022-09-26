@@ -1,4 +1,4 @@
-FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:${THISDIR}/u-boot/common:"
 
 # Always increment PR on u-boot config change or patches
 PR = "r1.ts"
@@ -6,6 +6,8 @@ PR = "r1.ts"
 # Overwrite poky side SRC_URI to remove all security etc patches
 # since we update to a newer version anyway and the patches don't apply
 SRC_URI = "git://git.denx.de/u-boot.git;branch=master"
+
+SRC_URI += "file://0001-tee-optee-rework-TA-bus-scanning-code.patch"
 
 PV = "2022.10-rc4"
 SRCREV = "51601397fcbb13e6dc2e4223408230c82955a601"

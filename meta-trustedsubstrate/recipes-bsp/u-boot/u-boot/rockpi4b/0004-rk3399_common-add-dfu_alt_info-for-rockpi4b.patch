@@ -1,7 +1,7 @@
-From 85fc62fe9977387dcb3ba0276470b66d6a705ec3 Mon Sep 17 00:00:00 2001
+From 93e6e9e52ff6e16a6bef967b22ff61824cdc3b2a Mon Sep 17 00:00:00 2001
 From: Peter Griffin <peter.griffin@linaro.org>
 Date: Fri, 20 May 2022 11:47:52 +0100
-Subject: [PATCH 5/9] rk3399_common: add dfu_alt_info for rockpi4b
+Subject: [PATCH 4/9] rk3399_common: add dfu_alt_info for rockpi4b
 
 See notes here:
 https://git.codelinaro.org/linaro/dependable-boot/meta-ts/-/blob/master/docs/README-rockchip.md

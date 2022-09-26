@@ -1,4 +1,4 @@
-From ef30cd8287f2078aac8e52c00ba2c32e93dafb1c Mon Sep 17 00:00:00 2001
+From c9e9770bef6b00b86d2db9f48a8e10b68c75d74b Mon Sep 17 00:00:00 2001
 From: Peter Griffin <peter.griffin@linaro.org>
 Date: Mon, 28 Mar 2022 12:34:54 +0100
 Subject: [PATCH 3/9] rk3399-rock-pi-4b-u-boot.dtsi: reserve optee memory to
