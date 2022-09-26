@@ -1,7 +1,7 @@
-From eabc076984a23821b926ea572a324607cf1558f4 Mon Sep 17 00:00:00 2001
+From bd0767711c1c1008e5f4c0d88129947904078097 Mon Sep 17 00:00:00 2001
 From: Jerome Forissier <jerome.forissier@linaro.org>
 Date: Fri, 20 May 2022 16:50:23 +0200
-Subject: [PATCH 8/9] rockchip: make_fit_atf: generate signed conf when
+Subject: [PATCH 7/9] rockchip: make_fit_atf: generate signed conf when
  FIT_SIGN_KEY is set
 
 Introduce the environment variable FIT_SIGN_KEY which when set is the name

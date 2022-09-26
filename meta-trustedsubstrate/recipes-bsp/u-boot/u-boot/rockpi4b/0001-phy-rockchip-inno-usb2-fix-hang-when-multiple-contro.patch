@@ -1,4 +1,4 @@
-From f8d7a8f273940211fbecb8e7f86b05d912b540a5 Mon Sep 17 00:00:00 2001
+From 4639706b9ea2c3056d19495c1bc2b3e044a9c497 Mon Sep 17 00:00:00 2001
 From: Icenowy Zheng <icenowy@aosc.io>
 Date: Tue, 6 Apr 2021 23:10:59 +0800
 Subject: [PATCH 1/9] phy: rockchip: inno-usb2: fix hang when multiple

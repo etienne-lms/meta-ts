@@ -1,0 +1,64 @@
+From 4bc10d7122e45b7141f871c04939d0c77fbfb9f9 Mon Sep 17 00:00:00 2001
+From: Sughosh Ganu <sughosh.ganu@linaro.org>
+Date: Tue, 20 Sep 2022 18:40:37 +0530
+Subject: [PATCH 9/9] rockchip: Enable embedding public key in dtb
+
+Enable embedding the public key to be used for capsule authentication
+in the platform's dtb while building the capsule.
+
+Signed-off-by: Sughosh Ganu <sughosh.ganu@linaro.org>
+---
+ arch/arm/mach-rockchip/make_fit_atf.py | 23 +++++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
+
+diff --git a/arch/arm/mach-rockchip/make_fit_atf.py b/arch/arm/mach-rockchip/make_fit_atf.py
+index 0c1e7e60d9..95a551c991 100755
+--- a/arch/arm/mach-rockchip/make_fit_atf.py
++++ b/arch/arm/mach-rockchip/make_fit_atf.py
+@@ -14,6 +14,7 @@ import sys
+ import getopt
+ import logging
+ import struct
++from subprocess import call, check_call, CalledProcessError
+ 
+ DT_HEADER = """
+ /*
+@@ -120,6 +121,27 @@ def append_conf_node(file, dtbs, segments):
+     file.write('\t};\n')
+     file.write('\n')
+ 
++def append_capsule_signature_node(dtbs):
++    if "CAPSULE_SIG" in os.environ:
++        sig_dts = os.getenv("CAPSULE_SIG")
++    elif os.path.isfile("./arch/arm/mach-rockchip/signature.dts"):
++        sig_dts = "./arch/arm/mach-rockchip/signature.dts"
++    else:
++        sig_dts = ""
++
++    sig_overlay = "./signature.dtbo"
++
++    if sig_dts:
++        try:
++            check_call('dtc -@ -I dts -O dtb -o %s %s' % (sig_overlay, sig_dts), shell=True)
++        except CalledProcessError as exc:
++            return exc
++
++        for dtb in dtbs:
++            call('fdtoverlay -i %s -o %s %s' % (dtb, dtb, sig_overlay), shell=True)
++
++        call('rm -rf %s' % sig_overlay, shell=True)
++
+ def generate_atf_fit_dts_uboot(file, uboot_file_name):
+     segments = unpack_elf(uboot_file_name)
+     if len(segments) != 1:
+@@ -278,6 +300,7 @@ def main():
+ 
+     dtbs = args
+ 
++    append_capsule_signature_node(dtbs)
+     generate_atf_fit_dts(fit_its, bl31_elf, tee_file, uboot_elf, dtbs)
+     generate_atf_binary(bl31_elf)
+     generate_tee_binary(tee_file)
+-- 
+2.30.2
+
