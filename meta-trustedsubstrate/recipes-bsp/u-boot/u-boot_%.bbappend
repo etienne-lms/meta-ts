@@ -8,6 +8,7 @@ PR = "r1.ts"
 SRC_URI = "git://git.denx.de/u-boot.git;branch=master"
 
 SRC_URI += "file://0001-tee-optee-rework-TA-bus-scanning-code.patch"
+SRC_URI += "file://0002-fix-smbios-tables.patch"
 
 PV = "2022.10-rc4"
 SRCREV = "51601397fcbb13e6dc2e4223408230c82955a601"

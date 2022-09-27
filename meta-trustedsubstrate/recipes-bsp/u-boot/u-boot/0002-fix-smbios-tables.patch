@@ -1,0 +1,353 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH 1/2] smbios: Simplify reporting of unknown values
+From: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Date: Tue, 06 Sep 2022 16:44:25 +0300
+Message-Id: <20220906134426.53748-1-ilias.apalodimas@linaro.org>
+To: u-boot@lists.denx.de
+Cc: trini@konsulko.com, sjg@chromium.org, heinrich.schuchardt@canonical.com, pbrobinson@gmail.com, Ilias Apalodimas <ilias.apalodimas@linaro.org>
+List-Id: U-Boot discussion <u-boot.lists.denx.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+If a value is not valid during the DT or SYSINFO parsing,  we explicitly
+set that to "Unknown Product" and "Unknown" for the product and
+manufacturer respectively.  It's cleaner if we move the checks insisde
+smbios_add_string() and always report "Unknown" regardless of the missing
+field.
+
+pre-patch dmidecode
+<snip>
+Handle 0x0001, DMI type 1, 27 bytes
+System Information
+        Manufacturer: Unknown
+        Product Name: Unknown Product
+        Version: Not Specified
+        Serial Number: Not Specified
+        UUID: Not Settable
+        Wake-up Type: Reserved
+        SKU Number: Not Specified
+        Family: Not Specified
+
+Handle 0x0002, DMI type 2, 14 bytes
+Base Board Information
+        Manufacturer: Unknown
+        Product Name: Unknown Product
+        Version: Not Specified
+        Serial Number: Not Specified
+        Asset Tag: Not Specified
+        Features:
+                Board is a hosting board
+        Location In Chassis: Not Specified
+        Chassis Handle: 0x0000
+        Type: Motherboard
+<snip>
+
+post-patch dmidecode:
+
+Handle 0x0001, DMI type 1, 27 bytes
+System Information
+        Manufacturer: Unknown
+        Product Name: Unknown
+        Version: Unknown
+        Serial Number: Unknown
+        UUID: Not Settable
+        Wake-up Type: Reserved
+        SKU Number: Unknown
+        Family: Unknown
+
+Handle 0x0002, DMI type 2, 14 bytes
+Base Board Information
+        Manufacturer: Unknown
+        Product Name: Unknown
+        Version: Unknown
+        Serial Number: Not Specified
+        Asset Tag: Unknown
+        Features:
+                Board is a hosting board
+        Location In Chassis: Not Specified
+        Chassis Handle: 0x0000
+        Type: Motherboard
+
+Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Reviewed-by: Peter Robinson <pbrobinson@gmail.com>
+Tested-by: Peter Robinson <pbrobinson@gmail.com>
+---
+ lib/smbios.c | 17 +++--------------
+ 1 file changed, 3 insertions(+), 14 deletions(-)
+
+diff --git a/lib/smbios.c b/lib/smbios.c
+index d7f4999e8b2a..fcc8686993ef 100644
+--- a/lib/smbios.c
++++ b/lib/smbios.c
+@@ -102,7 +102,7 @@ static int smbios_add_string(struct smbios_ctx *ctx, const char *str)
+ 	int i = 1;
+ 	char *p = ctx->eos;
+ 
+-	if (!*str)
++	if (!str || !*str)
+ 		str = "Unknown";
+ 
+ 	for (;;) {
+@@ -151,8 +151,7 @@ static int smbios_add_prop_si(struct smbios_ctx *ctx, const char *prop,
+ 		const char *str;
+ 
+ 		str = ofnode_read_string(ctx->node, prop);
+-		if (str)
+-			return smbios_add_string(ctx, str);
++		return smbios_add_string(ctx, str);
+ 	}
+ 
+ 	return 0;
+@@ -231,7 +230,7 @@ static int smbios_write_type0(ulong *current, int handle,
+ 	t->vendor = smbios_add_string(ctx, "U-Boot");
+ 
+ 	t->bios_ver = smbios_add_prop(ctx, "version");
+-	if (!t->bios_ver)
++	if (!strcmp(ctx->last_str, "Unknown"))
+ 		t->bios_ver = smbios_add_string(ctx, PLAIN_VERSION);
+ 	if (t->bios_ver)
+ 		gd->smbios_version = ctx->last_str;
+@@ -281,11 +280,7 @@ static int smbios_write_type1(ulong *current, int handle,
+ 	fill_smbios_header(t, SMBIOS_SYSTEM_INFORMATION, len, handle);
+ 	smbios_set_eos(ctx, t->eos);
+ 	t->manufacturer = smbios_add_prop(ctx, "manufacturer");
+-	if (!t->manufacturer)
+-		t->manufacturer = smbios_add_string(ctx, "Unknown");
+ 	t->product_name = smbios_add_prop(ctx, "product");
+-	if (!t->product_name)
+-		t->product_name = smbios_add_string(ctx, "Unknown Product");
+ 	t->version = smbios_add_prop_si(ctx, "version",
+ 					SYSINFO_ID_SMBIOS_SYSTEM_VERSION);
+ 	if (serial_str) {
+@@ -315,11 +310,7 @@ static int smbios_write_type2(ulong *current, int handle,
+ 	fill_smbios_header(t, SMBIOS_BOARD_INFORMATION, len, handle);
+ 	smbios_set_eos(ctx, t->eos);
+ 	t->manufacturer = smbios_add_prop(ctx, "manufacturer");
+-	if (!t->manufacturer)
+-		t->manufacturer = smbios_add_string(ctx, "Unknown");
+ 	t->product_name = smbios_add_prop(ctx, "product");
+-	if (!t->product_name)
+-		t->product_name = smbios_add_string(ctx, "Unknown Product");
+ 	t->version = smbios_add_prop_si(ctx, "version",
+ 					SYSINFO_ID_SMBIOS_BASEBOARD_VERSION);
+ 	t->asset_tag_number = smbios_add_prop(ctx, "asset-tag");
+@@ -344,8 +335,6 @@ static int smbios_write_type3(ulong *current, int handle,
+ 	fill_smbios_header(t, SMBIOS_SYSTEM_ENCLOSURE, len, handle);
+ 	smbios_set_eos(ctx, t->eos);
+ 	t->manufacturer = smbios_add_prop(ctx, "manufacturer");
+-	if (!t->manufacturer)
+-		t->manufacturer = smbios_add_string(ctx, "Unknown");
+ 	t->chassis_type = SMBIOS_ENCLOSURE_DESKTOP;
+ 	t->bootup_state = SMBIOS_STATE_SAFE;
+ 	t->power_supply_state = SMBIOS_STATE_SAFE;
+
+-- 
+2.37.2
+
+
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH 2/2] smbios: Fallback to the default DT if sysinfo nodes are missing
+From: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Date: Tue, 06 Sep 2022 16:44:26 +0300
+Message-Id: <20220906134426.53748-2-ilias.apalodimas@linaro.org>
+To: u-boot@lists.denx.de
+Cc: trini@konsulko.com, sjg@chromium.org, heinrich.schuchardt@canonical.com, pbrobinson@gmail.com, Ilias Apalodimas <ilias.apalodimas@linaro.org>
+In-Reply-To: <20220906134426.53748-1-ilias.apalodimas@linaro.org>
+References: <20220906134426.53748-1-ilias.apalodimas@linaro.org>
+List-Id: U-Boot discussion <u-boot.lists.denx.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+In order to fill in the SMBIOS tables U-Boot currently relies on a
+"u-boot,sysinfo-smbios" compatible node.  This is fine for the boards
+that already include such nodes.  However with some recent EFI changes,
+the majority of boards can boot up distros, which usually rely on
+things like dmidecode etc for their reporting.  For boards that
+lack this special node the SMBIOS output looks like:
+
+System Information
+        Manufacturer: Unknown
+        Product Name: Unknown
+        Version: Unknown
+        Serial Number: Unknown
+        UUID: Not Settable
+        Wake-up Type: Reserved
+        SKU Number: Unknown
+        Family: Unknown
+
+This looks problematic since most of the info are "Unknown".  The DT spec
+specifies standard properties containing relevant information like
+'model' and 'compatible' for which the suggested format is
+<manufacturer,model>.  So let's add a last resort to our current
+smbios parsing.  If none of the sysinfo properties are found,  we can
+scan the root node for 'model' and 'compatible'.
+
+pre-patch dmidecode:
+<snip>
+Handle 0x0001, DMI type 1, 27 bytes
+System Information
+        Manufacturer: Unknown
+        Product Name: Unknown
+        Version: Unknown
+        Serial Number: Unknown
+        UUID: Not Settable
+        Wake-up Type: Reserved
+        SKU Number: Unknown
+        Family: Unknown
+
+Handle 0x0002, DMI type 2, 14 bytes
+Base Board Information
+        Manufacturer: Unknown
+        Product Name: Unknown
+        Version: Unknown
+        Serial Number: Not Specified
+        Asset Tag: Unknown
+        Features:
+                Board is a hosting board
+        Location In Chassis: Not Specified
+        Chassis Handle: 0x0000
+        Type: Motherboard
+
+Handle 0x0003, DMI type 3, 21 bytes
+Chassis Information
+        Manufacturer: Unknown
+        Type: Desktop
+        Lock: Not Present
+        Version: Not Specified
+        Serial Number: Not Specified
+        Asset Tag: Not Specified
+        Boot-up State: Safe
+        Power Supply State: Safe
+        Thermal State: Safe
+        Security Status: None
+        OEM Information: 0x00000000
+        Height: Unspecified
+        Number Of Power Cords: Unspecified
+        Contained Elements: 0
+<snip>
+
+post-pastch dmidecode:
+<snip>
+Handle 0x0001, DMI type 1, 27 bytes
+System Information
+        Manufacturer: socionext,developer-box
+        Product Name: Socionext Developer Box
+        Version: Unknown
+        Serial Number: Unknown
+        UUID: Not Settable
+        Wake-up Type: Reserved
+        SKU Number: Unknown
+        Family: Unknown
+
+Handle 0x0002, DMI type 2, 14 bytes
+Base Board Information
+        Manufacturer: socionext,developer-box
+        Product Name: Socionext Developer Box
+        Version: Unknown
+        Serial Number: Not Specified
+        Asset Tag: Unknown
+        Features:
+                Board is a hosting board
+        Location In Chassis: Not Specified
+        Chassis Handle: 0x0000
+        Type: Motherboard
+
+Handle 0x0003, DMI type 3, 21 bytes
+Chassis Information
+        Manufacturer: socionext,developer-box
+        Type: Desktop
+        Lock: Not Present
+        Version: Not Specified
+        Serial Number: Not Specified
+        Asset Tag: Not Specified
+        Boot-up State: Safe
+        Power Supply State: Safe
+        Thermal State: Safe
+        Security Status: None
+        OEM Information: 0x00000000
+        Height: Unspecified
+        Number Of Power Cords: Unspecified
+        Contained Elements: 0
+<snip>
+
+Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Reviewed-by: Peter Robinson <pbrobinson@gmail.com>
+Tested-by: Peter Robinson <pbrobinson@gmail.com>
+---
+ lib/smbios.c | 41 +++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 39 insertions(+), 2 deletions(-)
+
+diff --git a/lib/smbios.c b/lib/smbios.c
+index fcc8686993ef..f2eb961f514b 100644
+--- a/lib/smbios.c
++++ b/lib/smbios.c
+@@ -43,6 +43,20 @@
+ 
+ DECLARE_GLOBAL_DATA_PTR;
+ 
++/**
++ * struct sysifno_to_dt - Mapping of sysinfo strings to DT
++ *
++ * @sysinfo_str: sysinfo string
++ * @dt_str: DT string
++ */
++static const struct {
++	const char *sysinfo_str;
++	const char *dt_str;
++} sysifno_to_dt[] = {
++	{ .sysinfo_str = "product", .dt_str = "model" },
++	{ .sysinfo_str = "manufacturer", .dt_str = "compatible" },
++};
++
+ /**
+  * struct smbios_ctx - context for writing SMBIOS tables
+  *
+@@ -87,6 +101,18 @@ struct smbios_write_method {
+ 	const char *subnode_name;
+ };
+ 
++static const char *convert_sysinfo_to_dt(const char *sysinfo_str)
++{
++	int i;
++
++	for (i = 0; i < ARRAY_SIZE(sysifno_to_dt); i++) {
++		if (!strcmp(sysinfo_str, sysifno_to_dt[i].sysinfo_str))
++			return sysifno_to_dt[i].dt_str;
++	}
++
++	return NULL;
++}
++
+ /**
+  * smbios_add_string() - add a string to the string area
+  *
+@@ -148,9 +174,20 @@ static int smbios_add_prop_si(struct smbios_ctx *ctx, const char *prop,
+ 			return smbios_add_string(ctx, val);
+ 	}
+ 	if (IS_ENABLED(CONFIG_OF_CONTROL)) {
+-		const char *str;
++		const char *str = NULL;
+ 
+-		str = ofnode_read_string(ctx->node, prop);
++		/*
++		 * If the node is not valid fallback and try the entire DT
++		 * so we can at least fill in maufacturer and board type
++		 */
++		if (!ofnode_valid(ctx->node)) {
++			const char *nprop = convert_sysinfo_to_dt(prop);
++
++			if (nprop)
++				str = ofnode_read_string(ofnode_root(), nprop);
++		} else {
++			str = ofnode_read_string(ctx->node, prop);
++		}
+ 		return smbios_add_string(ctx, str);
+ 	}
+ 
+
+-- 
+2.37.2
+
+
