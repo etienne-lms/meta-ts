@@ -7,7 +7,10 @@
             "LowestSupportedVersion": "1",
             "MonotonicCount": "0",
             "Payload": "idbloader.img",
-            "UpdateImageIndex": "1"
+            "UpdateImageIndex": "1",
+            "OpenSslSignerPrivateCertFile": "CRT.pem",
+            "OpenSslTrustedPublicCertFile": "CRT.pub.pem",
+            "OpenSslOtherPublicCertFile":   "CRT.pub.pem"
         },
 	{
             "FwVersion": "1",
@@ -16,7 +19,10 @@
             "LowestSupportedVersion": "1",
             "MonotonicCount": "0",
             "Payload": "u-boot.itb",
-            "UpdateImageIndex": "2"
+            "UpdateImageIndex": "2",
+            "OpenSslSignerPrivateCertFile": "CRT.pem",
+            "OpenSslTrustedPublicCertFile": "CRT.pub.pem",
+            "OpenSslOtherPublicCertFile":   "CRT.pub.pem"
 	}
     ]
 }

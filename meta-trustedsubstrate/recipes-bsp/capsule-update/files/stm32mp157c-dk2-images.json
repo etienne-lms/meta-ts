@@ -1,0 +1,16 @@
+{
+    "Payloads": [
+        {
+            "FwVersion": "1",
+            "Guid": "19d5df83-11b0-457b-be2c-7559c13142a5",
+            "HardwareInstance": "0",
+            "LowestSupportedVersion": "1",
+            "MonotonicCount": "0",
+            "Payload": "fip.bin",
+            "UpdateImageIndex": "1",
+            "OpenSslSignerPrivateCertFile": "CRT.pem",
+            "OpenSslTrustedPublicCertFile": "CRT.pub.pem",
+            "OpenSslOtherPublicCertFile":   "CRT.pub.pem"
+        }
+    ]
+}

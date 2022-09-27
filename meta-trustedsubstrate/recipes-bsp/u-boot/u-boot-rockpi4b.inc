@@ -13,7 +13,7 @@ SRC_URI += "file://0006-rockchip-rk3399-enable-spl-fifo-mode-for-sdmmc-only-.pat
 SRC_URI += "file://0007-rockchip-make_fit_atf-generate-signed-conf-when-FIT_.patch"
 SRC_URI += "file://0008-u-boot-rk3399-capsule-update-support.patch"
 SRC_URI += "file://0009-rockchip-Enable-embedding-public-key-in-dtb.patch"
-SRC_URI += "file://rockpi4b/images.json"
+SRC_URI += "file://signature.dts"
 
 COMPATIBLE_MACHINE = "rockpi4b"
 
@@ -24,6 +24,21 @@ do_compile:prepend() {
 	ls -l ${BL31}
 	export TEE="${RECIPE_SYSROOT}/lib/firmware/tee.bin"
 	ls -l ${TEE}
+
+        if [ -e "${UEFI_CAPSULE_CERT_FILE}" ]; then
+                for config in ${UBOOT_MACHINE}; do
+                        mkdir -p uefi_capsule_certs
+                        tar xpvfz ${UEFI_CAPSULE_CERT_FILE} -C uefi_capsule_certs
+
+                        cp uefi_capsule_certs/CRT.pem ${B}/${config}/CRT.pem
+                        cp uefi_capsule_certs/CRT.pub.pem ${B}/${config}/CRT.pub.pem
+
+                        cp ${WORKDIR}/signature.dts ${B}/${config}/signature.dts
+                        export CAPSULE_SIG=${B}/${config}/signature.dts
+                        ESL="`pwd`/uefi_capsule_certs/CRT.esl"
+                        sed -i "s|CRT.esl|${ESL}|" ${CAPSULE_SIG}
+                done
+        fi
 }
 
 do_compile:append() {
@@ -53,8 +68,6 @@ do_compile:append() {
 			spl/u-boot-spl.dtb > idbloader.img
 	}; fi
 }
-
-require u-boot-capsule.inc
 
 do_deploy:append() {
 	mkdir -p ${DEPLOYDIR}
