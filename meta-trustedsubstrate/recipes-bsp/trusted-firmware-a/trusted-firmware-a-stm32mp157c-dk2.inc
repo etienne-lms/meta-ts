@@ -41,6 +41,7 @@ EXTRA_OEMAKE += "\
                         BL32_EXTRA1=${RECIPE_SYSROOT}/lib/firmware/tee-pager_v2.bin \
                         BL32_EXTRA2=${RECIPE_SYSROOT}/lib/firmware/tee-pageable_v2.bin \
                         LOG_LEVEL=1 \
+                        PSA_FWU_SUPPORT=1 \
 			"
 
 do_deploy:append() {
