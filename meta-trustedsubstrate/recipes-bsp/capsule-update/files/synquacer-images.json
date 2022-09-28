@@ -1,0 +1,40 @@
+{
+    "Payloads": [
+        {
+            "FwVersion": "1",
+            "Guid": "53a92e83-4ef4-473a-8b0d-b5d8c7b2d600",
+            "HardwareInstance": "0",
+            "LowestSupportedVersion": "1",
+            "MonotonicCount": "0",
+            "Payload": "u-boot.bin",
+            "UpdateImageIndex": "1",
+            "OpenSslSignerPrivateCertFile": "CRT.pem",
+            "OpenSslTrustedPublicCertFile": "CRT.pub.pem",
+            "OpenSslOtherPublicCertFile":   "CRT.pub.pem"
+        },
+        {
+            "FwVersion": "1",
+            "Guid": "880866e9-84ba-4793-a908-33e0b916f398",
+            "HardwareInstance": "0",
+            "LowestSupportedVersion": "1",
+            "MonotonicCount": "0",
+            "Payload": "fip_all_arm_tf_optee.bin",
+            "UpdateImageIndex": "2",
+            "OpenSslSignerPrivateCertFile": "CRT.pem",
+            "OpenSslTrustedPublicCertFile": "CRT.pub.pem",
+            "OpenSslOtherPublicCertFile":   "CRT.pub.pem"
+        },
+        {
+            "FwVersion": "1",
+            "Guid": "c1b629f1-ce0e-4894-82bf-f0a38387e630",
+            "HardwareInstance": "0",
+            "LowestSupportedVersion": "1",
+            "MonotonicCount": "0",
+            "Payload": "tee-pager_v2.bin",
+            "UpdateImageIndex": "3",
+            "OpenSslSignerPrivateCertFile": "CRT.pem",
+            "OpenSslTrustedPublicCertFile": "CRT.pub.pem",
+            "OpenSslOtherPublicCertFile":   "CRT.pub.pem"
+        }
+    ]
+}

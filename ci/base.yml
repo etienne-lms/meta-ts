@@ -51,6 +51,8 @@ local_conf_header:
     PACKAGECONFIG:append:pn-perf = " coresight"
     BB_ENV_PASSTHROUGH_ADDITIONS = "UEFI_CERT_FILE"
     UEFI_CERT_FILE = "${TOPDIR}/../meta-trustedsubstrate/uefi-certificates/uefi_certs.tgz"
+    BB_ENV_PASSTHROUGH_ADDITIONS = "UEFI_CAPSULE_CERT_FILE"
+    UEFI_CAPSULE_CERT_FILE = "${TOPDIR}/../meta-trustedsubstrate/uefi-certificates/capsule_certs.tgz"
     INHERIT += "buildhistory"
     BUILDHISTORY_COMMIT = "1"
   noptest: |
