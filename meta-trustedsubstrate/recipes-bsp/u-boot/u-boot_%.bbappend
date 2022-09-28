@@ -10,8 +10,8 @@ SRC_URI = "git://git.denx.de/u-boot.git;branch=master"
 SRC_URI += "file://0001-tee-optee-rework-TA-bus-scanning-code.patch"
 SRC_URI += "file://0002-fix-smbios-tables.patch"
 
-PV = "2022.10-rc4"
-SRCREV = "51601397fcbb13e6dc2e4223408230c82955a601"
+PV = "2022.10-rc5"
+SRCREV = "f76f3e3b44328fe6229650540109af93750fd5f0"
 LIC_FILES_CHKSUM = "file://Licenses/README;md5=2ca5f2c35c8cc335f0a19756634782f1"
 
 do_configure:prepend() {
