@@ -1,0 +1,28 @@
+{
+    "Payloads": [
+        {
+            "FwVersion": "1",
+            "Guid": "de6066e8-0256-4fad-8238-e406e274c4cf",
+            "HardwareInstance": "0",
+            "LowestSupportedVersion": "1",
+            "MonotonicCount": "0",
+            "Payload": "ImageA.bin",
+            "UpdateImageIndex": "1",
+            "OpenSslSignerPrivateCertFile": "CRT.pem",
+            "OpenSslTrustedPublicCertFile": "CRT.pub.pem",
+            "OpenSslOtherPublicCertFile":   "CRT.pub.pem"
+        },
+        {
+            "FwVersion": "1",
+            "Guid": "cf9ecfd4-938b-41c5-8551-1f883ab7dc18",
+            "HardwareInstance": "0",
+            "LowestSupportedVersion": "1",
+            "MonotonicCount": "0",
+            "Payload": "ImageB.bin",
+            "UpdateImageIndex": "2",
+            "OpenSslSignerPrivateCertFile": "CRT.pem",
+            "OpenSslTrustedPublicCertFile": "CRT.pub.pem",
+            "OpenSslOtherPublicCertFile":   "CRT.pub.pem"
+        }
+    ]
+}
