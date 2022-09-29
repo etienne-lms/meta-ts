@@ -56,6 +56,7 @@ replace <board> with
 * rockpi4b
 * rpi4
 * zynqmp-starter
+* zynqmp-production
 
 The build output is in ``build/tmp/deploy/images/``
 

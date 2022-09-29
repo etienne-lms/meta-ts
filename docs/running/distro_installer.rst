@@ -113,11 +113,13 @@ Raspberry Pi4
     => efidebug boot order 1
     => bootefi bootmgr
 
-Xilinx KV260 AI Starter kit
-===========================
+Xilinx KV260 AI Starter and Commercial kit
+==========================================
+
+USB is not yet supported in U-Boot so use the mmc card instead.
 
 .. code-block:: bash
 
-    => efidebug boot add -b 1 BootLedge usb 0:1 efi/boot/bootaa64.efi -i usb 0:1 ledge-initramfs.rootfs.cpio.gz -s 'console=ttyPS1,115200 console=tty0 root=UUID=6091b3a4-ce08-3020-93a6-f755a22ef03b rootwait panic=60'
+    => efidebug boot add -b 1 BootLedge mmc 0:1 efi/boot/bootaa64.efi -i mmc 0:1 ledge-initramfs.rootfs.cpio.gz -s 'console=ttyPS1,115200 console=tty0 root=UUID=6091b3a4-ce08-3020-93a6-f755a22ef03b rootwait panic=60'
     => efidebug boot order 1
     => bootefi bootmgr

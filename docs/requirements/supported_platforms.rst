@@ -58,6 +58,7 @@ Board Support
 * `Rockpi4 <https://rockpi.org/rockpi4>`_
 * `Raspberry Pi4 <https://www.raspberrypi.com/products/raspberry-pi-4-model-b/specifications/>`_
 * `Xilinx kv260 starter kit <https://www.xilinx.com/products/som/kria/kv260-vision-starter-kit.html>`_
+* `Xilinx kv260 commercial <https://www.xilinx.com/products/som/kria/k26c-commercial.html>`_
 
 Supported platform features
 ===========================
@@ -72,4 +73,5 @@ stm32mp157c-ev1          TF-A          Yes (RPMB vars)     No                   
 Rockpi4                  U-Boot SPL    Yes (RPMB vars)     Yes [fTPM]_              No
 Raspberry Pi4            Proprietary   Yes (Built-in vars) Yes (needs SPI TPM)      No
 Xilinx kv260 starter kit U-Boot SPL    Yes (Built-in vars) Yes                      WIP
+Xilinx kv260 commercial  U-Boot SPL    Yes (Built-in vars) Yes                      WIP
 ======================== ============  =================== ======================== ===========
