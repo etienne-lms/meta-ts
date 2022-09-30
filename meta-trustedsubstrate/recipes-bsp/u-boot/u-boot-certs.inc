@@ -1,3 +1,4 @@
+inherit openssl-native
 inherit python3native
 
 DEPENDS += " python3-pyopenssl-native"
