@@ -1,0 +1,24 @@
+### Shell environment set up for builds. ###
+
+To build for all target machines, please copy multiconfig setup:
+
+ $ cp -a ../meta-ts/meta-trustedsubstrate/conf/templates/multiconfig conf/
+
+Then you can run 'bitbake <target>'
+
+Common targets are:
+
+    ts-firmware (for default MACHINE=tsqemuarm64-secureboot)
+    mc:rockpi4b:ts-firmware
+    mc:rpi4b:ts-firmware
+    mc:stm32mp157c-dk2:ts-firmware
+    mc:stm32mp157c-ev1:ts-firmware
+    mc:synquacer:ts-firmware
+    mc:tsqemuarm64-secureboot:ts-firmware
+    mc:zynqmp-production:ts-firmware
+    mc:zynqmp-starter:ts-firmware
+
+Other commonly useful commands are:
+ - 'devtool' and 'recipetool' handle common recipe tasks
+ - 'bitbake-layers' handles common layer tasks
+ - 'oe-pkgdata-util' handles common target package tasks
