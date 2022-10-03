@@ -106,7 +106,7 @@ new file mode 100644
 index 0000000000..28bb9756ad
 --- /dev/null
 +++ b/lib/fwu_updates/fwu_gpt.c
-@@ -0,0 +1,119 @@
+@@ -0,0 +1,121 @@
 +// SPDX-License-Identifier: GPL-2.0-or-later
 +/*
 + * Copyright (c) 2022, Linaro Limited
@@ -180,12 +180,14 @@ index 0000000000..28bb9756ad
 +
 +	dfu_init_env_entities(NULL, NULL);
 +
++	i = 0;
 +	while (true) {
 +		dfu = dfu_get_entity(i);
 +		if (!dfu) {
 +			ret = -ENOENT;
 +			break;
 +		}
++		i++;
 +
 +		if (dfu->dev_type != dfu_dev)
 +			continue;

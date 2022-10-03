@@ -21,6 +21,8 @@ SRC_URI:append = " file://0012-test-dm-Add-test-cases-for-FWU-Metadata-uclass.pa
 SRC_URI:append = " file://0013-mkeficapsule-Add-support-for-generating-empty-capsul.patch"
 SRC_URI:append = " file://0014-mkeficapsule-Add-support-for-setting-OEM-flags-in-ca.patch"
 SRC_URI:append = " file://0015-FWU-doc-Add-documentation-for-the-FWU-feature.patch"
+SRC_URI:append = " file://0016-fixup-test-dm-Add-test-cases-for-FWU-Metadata-uclass.patch"
+SRC_URI:append = " file://0018-fixup-efi_update_capsule-for-fwu.patch"
 
 do_deploy:append() {
 	mkdir -p ${DEPLOYDIR}

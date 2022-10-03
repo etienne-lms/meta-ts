@@ -1,0 +1,54 @@
+From 09544efbcdcb423c706289285af2f8fbc60dc10b Mon Sep 17 00:00:00 2001
+From: Etienne Carriere <etienne.carriere@linaro.org>
+Date: Wed, 12 Oct 2022 20:13:55 +0200
+Subject: FIXUP! Sughosh patch: implement FWU mullti bank in
+ efi_update_capsule()
+
+Fixup patch v12 10/15 "FWU: Add support for the FWU Multi Bank Update feature"
+
+Signed-off-by: Etienne Carriere <etienne.carriere@linaro.org>
+
+diff --git a/lib/efi_loader/efi_capsule.c b/lib/efi_loader/efi_capsule.c
+index 23baf1c6b6..70ac46576b 100644
+--- a/lib/efi_loader/efi_capsule.c
++++ b/lib/efi_loader/efi_capsule.c
+@@ -716,6 +716,9 @@ efi_status_t EFIAPI efi_update_capsule(
+ 	struct efi_capsule_header *capsule;
+ 	unsigned int i;
+ 	efi_status_t ret;
++	bool capsule_update = true;
++	bool update_status = true;
++	bool fw_accept_os = false;
+ 
+ 	EFI_ENTRY("%p, %zu, %llu\n", capsule_header_array, capsule_count,
+ 		  scatter_gather_list);
+@@ -740,6 +743,15 @@ efi_status_t EFIAPI efi_update_capsule(
+ 		if (!guidcmp(&capsule->capsule_guid,
+ 			     &efi_guid_firmware_management_capsule_id)) {
+ 			ret  = efi_capsule_update_firmware(capsule);
++
++			if (IS_ENABLED(CONFIG_FWU_MULTI_BANK_UPDATE)) {
++				if (ret == EFI_SUCCESS)
++					fwu_post_update_checks(capsule,
++							       &fw_accept_os,
++							       &capsule_update);
++				else
++					update_status = false;
++			}
+ 		} else {
+ 			log_err("Unsupported capsule type: %pUs\n",
+ 				&capsule->capsule_guid);
+@@ -756,6 +767,13 @@ efi_status_t EFIAPI efi_update_capsule(
+ 		if (ret != EFI_SUCCESS)
+ 			log_warning("ESRT update failed\n");
+ 	}
++
++	if (capsule_update && IS_ENABLED(CONFIG_FWU_MULTI_BANK_UPDATE)) {
++		if (update_status)
++			ret = fwu_post_update_process(fw_accept_os);
++		else
++			log_err("All capsules were not updated. Not updating FWU metadata\n");
++	}
+ out:
+ 
+ 	return EFI_EXIT(ret);

@@ -1,0 +1,28 @@
+From b8d5b6cf5f00c80da69bbe61b8115f3fa824b46b Mon Sep 17 00:00:00 2001
+From: Etienne Carriere <etienne.carriere@linaro.org>
+Date: Wed, 5 Oct 2022 22:35:54 +0200
+Subject: [PATCH] fixup! test: dm: Add test cases for FWU Metadata uclass
+
+Signed-off-by: Etienne Carriere <etienne.carriere@linaro.org>
+---
+ tools/Makefile | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/tools/Makefile b/tools/Makefile
+index c479d3cb4c..3fe25afab3 100644
+--- a/tools/Makefile
++++ b/tools/Makefile
+@@ -74,7 +74,9 @@ mkenvimage-objs := mkenvimage.o os_support.o lib/crc32.o
+ hostprogs-y += dumpimage mkimage
+ hostprogs-$(CONFIG_TOOLS_LIBCRYPTO) += fit_info fit_check_sign
+ 
+-hostprogs-$(CONFIG_CMD_BOOTEFI_SELFTEST)$(CONFIG_FWU_MDATA_GPT_BLK) += file2include
++ifneq (,$(CONFIG_CMD_BOOTEFI_SELFTEST)$(CONFIG_FWU_MDATA_GPT_BLK))
++hostprogs-y += file2include
++endif
+ 
+ FIT_OBJS-y := fit_common.o fit_image.o image-host.o boot/image-fit.o
+ FIT_SIG_OBJS-$(CONFIG_TOOLS_LIBCRYPTO) := image-sig-host.o boot/image-fit-sig.o
+-- 
+2.25.1
+
