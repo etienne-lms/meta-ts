@@ -14,17 +14,10 @@ repos:
   poky:
     path: layers/poky
     url: https://git.yoctoproject.org/git/poky
-    refspec: d64bef1c7d713b92a51228e5ade945835e5a94a4
+    refspec: e81e703fb6fd028f5d01488a62dcfacbda16aa9e
     layers:
       meta:
       meta-poky:
-    patches:
-      p1:
-        repo : poky
-        path : ../../patches/0001-u-boot-switch-from-append-to-in-SRC_URI.patch
-      p2:
-        repo : poky
-        path : ../../patches/0001-openssl-relocation-fixes-for-finding-modules-etc.patch
   meta-arm:
     path: layers/meta-arm
     url: git://git.yoctoproject.org/meta-arm
