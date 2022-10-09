@@ -1,0 +1,25 @@
+From 1595e869d7ee44222db096e4a3c8f269b6bcc30a Mon Sep 17 00:00:00 2001
+From: Etienne Carriere <etienne.carriere@linaro.org>
+Date: Thu, 29 Sep 2022 13:59:22 +0200
+Subject: fixup! stm32mp1: dk2: Add a node for the FWU metadata device
+
+Add fwu-mdata node to EV1
+
+Signed-off-by: Etienne Carriere <etienne.carriere@linaro.org>
+
+diff --git a/arch/arm/dts/stm32mp157c-ev1-u-boot.dtsi b/arch/arm/dts/stm32mp157c-ev1-u-boot.dtsi
+index ec60486f41..7bf08bec6d 100644
+--- a/arch/arm/dts/stm32mp157c-ev1-u-boot.dtsi
++++ b/arch/arm/dts/stm32mp157c-ev1-u-boot.dtsi
+@@ -14,6 +14,11 @@
+ 		spi0 = &qspi;
+ 		usb0 = &usbotg_hs;
+ 	};
++
++	fwu-mdata {
++		compatible = "u-boot,fwu-mdata-gpt";
++		fwu-mdata-store = <&sdmmc1>;
++	};
+ };
+ 
+ &flash0 {

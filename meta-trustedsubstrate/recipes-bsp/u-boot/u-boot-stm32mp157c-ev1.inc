@@ -22,6 +22,7 @@ SRC_URI:append = " file://0013-mkeficapsule-Add-support-for-generating-empty-cap
 SRC_URI:append = " file://0014-mkeficapsule-Add-support-for-setting-OEM-flags-in-ca.patch"
 SRC_URI:append = " file://0015-FWU-doc-Add-documentation-for-the-FWU-feature.patch"
 SRC_URI:append = " file://0016-fixup-test-dm-Add-test-cases-for-FWU-Metadata-uclass.patch"
+SRC_URI:append = " file://0017-stm32mp1-ev1-Add-a-node-for-the-FWU-metadata-device.patch"
 
 do_deploy () {
 	mkdir -p ${DEPLOYDIR}
