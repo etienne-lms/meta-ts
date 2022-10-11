@@ -1,0 +1,41 @@
+This directory contains firmware reference images for SystemReady IR
+certification.
+
+
+ts-firmware-stm32mp157c-ev1.wic.gz
+
+  STM32MP157C-EV1 firmares for SR-IR v1.0, built from ci/stm32mp157c-ev1.yml.
+
+  Program SDcard with a command like the below:
+  host> zcat ts-firmware-stm32mp157c-ev1.wic.gz | dd conv=fdatasync of=/dev/sdX
+
+  It is recommended to relocate the backup GPT table once SDcard is
+  programmed. One can use sgdisk tool:
+  host> sgdisk -e /dev/sdX
+
+  Warning:
+  These images will attempt to the program eMMC RPMB key with OP-TEE test key.
+  To prevent OP-TEE attempting to write a RPMB key in your device, disable
+  CFG_RPMB_WRITE_KEY (=n) in meta-trustedsubstrate recipe
+  optee/optee-os-stm32mp157c-ev1.inc and rebuild ci/stm32mp157c-ev1.yml.
+  Check OP-TEE configuration for an alternate RPMB keys.
+
+  OP-TEE RPMB test key can be found in optee_os source tree, with
+  CFG_RPMB_TESTKEY. Below is its byte value:
+        0xD3, 0xEB, 0x3E, 0xC3, 0x6E, 0x33, 0x4C, 0x9F,
+	0x98, 0x8C, 0xE2, 0xC0, 0xB8, 0x59, 0x54, 0x61,
+	0x0D, 0x2B, 0xCF, 0x86, 0x64, 0x84, 0x4D, 0xF2,
+	0xAB, 0x56, 0xE6, 0xC6, 0x1B, 0xB7, 0x01, 0xE4.
+
+
+ts-firmware-stm32mp157c-dk2.wic.gz
+
+  STM32MP157C-DK2 firmares for SR-IR v1.0, built from ci/stm32mp157c-dk2.yml.
+
+  Program SDcard with a command like the below:
+  host> zcat ts-firmware-stm32mp157c-dk2.wic.gz | dd conv=fdatasync of=/dev/sdX
+
+  It is recommended to relocate the backup GPT table once SDcard is
+  programmed. One can use sgdisk tool:
+  host> sgdisk -e /dev/sdX
+
