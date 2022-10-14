@@ -1,0 +1,51 @@
+From 540d3951ff9b49b22870d258c2cbf91f2cd825d5 Mon Sep 17 00:00:00 2001
+From: Etienne Carriere <etienne.carriere@linaro.org>
+Date: Fri, 14 Oct 2022 13:24:38 +0200
+Subject: arch: arm: stm32mp1: disable SDMMC in OS
+
+Allow U-Boot to disable the sdmmc nodes from DT passed to the
+booted OS according to existence of U-Boot env variable
+stm32mp15_disable_os_sdmmc.
+
+This is needed OS distributions that do not enable STM32 SDMMC MMCI
+variant and will crash when probing mmci driver on stm32mp15 boards.
+This changes uses U-Boot environment variable stm32mp15
+
+Signed-off-by: Etienne Carriere <etienne.carriere@linaro.org>
+
+diff --git a/arch/arm/mach-stm32mp/fdt.c b/arch/arm/mach-stm32mp/fdt.c
+index 3b4c05d745..e319105f25 100644
+--- a/arch/arm/mach-stm32mp/fdt.c
++++ b/arch/arm/mach-stm32mp/fdt.c
+@@ -6,6 +6,7 @@
+ #define LOG_CATEGORY LOGC_ARCH
+ 
+ #include <common.h>
++#include <env.h>
+ #include <fdtdec.h>
+ #include <fdt_support.h>
+ #include <log.h>
+@@ -42,6 +43,10 @@
+ #define STM32MP15_GPU_BASE	0x59000000
+ #define STM32MP15_DSI_BASE	0x5a000000
+ 
++#define STM32MP15_SDMMC1_BASE	0x58005000
++#define STM32MP15_SDMMC2_BASE	0x58007000
++#define STM32MP15_SDMMC3_BASE	0x48004000
++
+ static const u32 stm32mp13_ip_addr[] = {
+ 	0x50025000,		/* 0 VREFBUF APB3 */
+ 	0x50021000,		/* 1 LPTIM2 APB3 */
+@@ -508,6 +513,12 @@ int ft_system_setup(void *blob, struct bd_info *bd)
+ 		if (CONFIG_IS_ENABLED(STM32MP15x_STM32IMAGE) &&
+ 		    !tee_find_device(NULL, NULL, NULL, NULL))
+ 			stm32_fdt_disable_optee(blob);
++
++		if (env_get("stm32mp15_disable_os_sdmmc")) {
++			stm32_fdt_disable(blob, soc, STM32MP15_SDMMC1_BASE, "mmc", "sdmmc1");
++			stm32_fdt_disable(blob, soc, STM32MP15_SDMMC2_BASE, "mmc", "sdmmc2");
++			stm32_fdt_disable(blob, soc, STM32MP15_SDMMC3_BASE, "mmc", "sdmmc3");
++		}
+ 	}
+ 
+ 	return ret;

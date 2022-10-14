@@ -24,6 +24,7 @@ SRC_URI:append = " file://0015-FWU-doc-Add-documentation-for-the-FWU-feature.pat
 SRC_URI:append = " file://0016-fixup-test-dm-Add-test-cases-for-FWU-Metadata-uclass.patch"
 SRC_URI:append = " file://0017-stm32mp1-ev1-Add-a-node-for-the-FWU-metadata-device.patch"
 SRC_URI:append = " file://0018-fixup-efi_update_capsule-for-fwu.patch"
+SRC_URI:append = " file://0019-arch-arm-stm32mp1-disable-SDMMC-in-OS.patch"
 
 do_deploy () {
 	mkdir -p ${DEPLOYDIR}
